@@ -307,6 +307,7 @@
     .name{ display:flex; flex-direction:column; line-height:1.15; }
     .name b{ font-size:13px; }
     .name span{ font-size:11px; color: var(--muted); }
+    .name span:empty{ display:none; }
 
     .count{ font-weight:900; font-size:14px; }
     .bar{
@@ -631,7 +632,7 @@
 
         <div class="pill">
           <label for="q">Search</label>
-          <input id="q" type="search" placeholder="Name or email…" />
+          <input id="q" type="search" placeholder="Search name…" />
         </div>
 
         <button class="btn" id="refreshNow" title="Fetch latest sheet data now">REFRESH NOW</button>
@@ -878,6 +879,19 @@ function initials(nameOrEmail){
   const parts = s.split(/\s+/).filter(Boolean);
   if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
   return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+}
+
+function pseudonymFromEmail(email){
+  // Stable, short code so we never show emails in the UI.
+  const e = String(email || "");
+  if(!e) return "Mystery Dawg";
+  let h = 2166136261;
+  for(let i=0;i<e.length;i++){
+    h ^= e.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  const code = (h >>> 0) % 1000;
+  return "Dawg " + String(code).padStart(3, "0");
 }
 
 function parseDate(s){
@@ -1396,7 +1410,7 @@ function compute(scopeDays){
   const rows = (PARTICIPANTS || [])
     .map(p => ({
       ...p,
-      displayName: (p.name && p.name.trim()) ? p.name.trim() : (p.email || "Unknown"),
+      displayName: (p.name && p.name.trim()) ? p.name.trim() : pseudonymFromEmail(p.email),
       lastSeen: lastByEmail.get(p.email) || null
     }))
     .sort((a,b)=> (Number(b.count)||0) - (Number(a.count)||0) || (a.displayName||"").localeCompare(b.displayName||""));
@@ -1442,11 +1456,10 @@ function render(){
   // leaderboard filter
   const filtered = rows.filter(r => {
     const a = (r.displayName||"").toLowerCase();
-    const b = (r.email||"").toLowerCase();
-    return !q || a.includes(q) || b.includes(q);
+    return !q || a.includes(q);
   });
 
-  const max = rows.length ? (Number(rows[0].count)||1) : 1;
+const max = rows.length ? (Number(rows[0].count)||1) : 1;
   const tbody = $("#tbody");
   tbody.innerHTML = "";
 
@@ -1468,7 +1481,7 @@ function render(){
           <div class="avatar">${ava}</div>
           <div class="name">
             <b>${escapeHtml(r.displayName)}</b>
-            <span>${escapeHtml(r.email)}</span>
+            
           </div>
         </div>
       </td>
@@ -1496,7 +1509,7 @@ function render(){
 
   const usedComments = new Set();
   useSubs.forEach((s) => {
-    const name = (s.name && s.name.trim()) ? s.name.trim() : (rows.find(p=>p.email===s.email)?.displayName || s.email || "Unknown");
+    const name = (s.name && s.name.trim()) ? s.name.trim() : (rows.find(p=>p.email===s.email)?.displayName || pseudonymFromEmail(s.email));
     const thumb = s.photo ? driveThumb(s.photo) : null;
     const comment = pickComment(name, spicyOn(), `${s.email}|${s.ts}|${s.photo}`, usedComments);
 
