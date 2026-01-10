@@ -265,7 +265,7 @@
       border-collapse:separate;
       border-spacing:0;
       font-size:13px;
-      min-width: 760px;
+      min-width: 680px;
     }
     thead th{
       text-align:left;
@@ -307,6 +307,7 @@
     .name{ display:flex; flex-direction:column; line-height:1.15; }
     .name b{ font-size:13px; }
     .name span{ font-size:11px; color: var(--muted); }
+    .name span:empty{ display:none; }
 
     .count{ font-weight:900; font-size:14px; }
     .bar{
@@ -442,17 +443,168 @@
     }
     .confetti i{
       position:absolute;
-      width:10px;height:16px;
-      background: var(--mustard);
+      font-size: 24px;
+      line-height: 1;
+      background: none;
+      width:auto;height:auto;
       opacity:.95;
-      transform: translateY(-10vh) rotate(0deg);
-      animation: fall 1.4s linear forwards;
-      border-radius: 3px;
-      filter: drop-shadow(0 6px 12px rgba(0,0,0,.4));
+      transform: translate3d(0,-12vh,0) rotate(0deg);
+      animation: fallEmoji 1.9s linear forwards;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,.45));
+      user-select:none;
+      will-change: transform;
     }
-    @keyframes fall{
-      to{ transform: translateY(110vh) rotate(520deg); opacity:1; }
+    @keyframes fallEmoji{
+      to{
+        transform: translate3d(var(--drift, 0px), 110vh, 0) rotate(540deg);
+        opacity:1;
+      }
     }
+}
+  
+    
+    /* Intro animation: flying dawg gets eaten */
+    .intro-scene{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 120;
+      opacity: 1;
+    }
+    .intro-scene.done{
+      opacity: 0;
+      transition: opacity .25s ease-out;
+    }
+    .intro-caption{
+      position:absolute;
+      left: 14px;
+      top: 84px;
+      font-weight: 900;
+      font-size: 14px;
+      letter-spacing: .2px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(17,19,26,.80);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow);
+      transform: translateY(-8px);
+      opacity: 0;
+      animation: introCaptionIn .35s ease-out forwards .15s;
+    }
+    @keyframes introCaptionIn{
+      to{ transform: translateY(0); opacity: 1; }
+    }
+    .intro-human{
+      position:absolute;
+      right: 10px;
+      top: 110px;
+      font-size: 64px;
+      transform: translateX(120px);
+      opacity: 0;
+      filter: drop-shadow(0 12px 30px rgba(0,0,0,.45));
+      animation: humanIn .45s ease-out forwards .25s;
+    }
+    .intro-fork{
+      position:absolute;
+      right: 78px;
+      top: 160px;
+      font-size: 40px;
+      transform: translateX(160px) rotate(-20deg);
+      opacity: 0;
+      animation: forkIn .55s ease-out forwards .28s;
+      filter: drop-shadow(0 12px 30px rgba(0,0,0,.45));
+    }
+    @keyframes humanIn{ to{ transform: translateX(0); opacity: 1; } }
+    @keyframes forkIn{ to{ transform: translateX(0) rotate(10deg); opacity: 1; } }
+
+    .intro-dawg{
+      position:absolute;
+      left: -110px;
+      top: 128px;
+      font-size: 86px;
+      filter: drop-shadow(0 16px 38px rgba(0,0,0,.60));
+      animation: dawgFly 3.2s cubic-bezier(.2,.9,.2,1) forwards .15s;
+    }
+    .intro-dawg::after{
+      content:"";
+      position:absolute;
+      left:-80px;
+      top: 50%;
+      width: 90px;
+      height: 12px;
+      transform: translateY(-50%);
+      background: linear-gradient(90deg, rgba(243,193,26,.0), rgba(243,193,26,.35), rgba(209,42,42,.25), rgba(74,214,109,.22), rgba(124,255,203,.0));
+      border-radius: 999px;
+      filter: blur(1px);
+      opacity: .9;
+    }
+    @keyframes dawgFly{
+      0%{ transform: translateX(-10vw) rotate(-14deg) scale(1); opacity: 1; }
+      70%{ transform: translateX(calc(74vw)) rotate(10deg) scale(1.10); opacity: 1; }
+      88%{ transform: translateX(calc(82vw)) rotate(4deg) scale(.62); opacity: 1; }
+      100%{ transform: translateX(calc(84vw)) rotate(0deg) scale(.28); opacity: 0; }
+    }
+
+    @media (max-width: 520px){
+      .table-wrap{ margin-top: 8px; }
+      table{
+        min-width: 0;
+        font-size: 12px;
+        table-layout: fixed;
+      }
+      thead th{ padding: 8px 8px; font-size:10px; }
+      tbody td{ padding: 10px 8px; }
+
+      thead th:nth-child(1){ width: 44px; }
+      thead th:nth-child(3){ width: 54px; }
+      thead th:nth-child(4){ width: 92px; }
+      thead th:nth-child(5){ width: 92px; }
+
+      .rank{ width: 44px; font-size:11px; }
+      .namecell{ min-width: 0; gap:8px; }
+      .avatar{ width:28px; height:28px; border-radius:10px; }
+      .name b{ font-size:12px; }
+      .name span{
+        max-width: 150px;
+        overflow:hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display:block;
+      }
+
+      .count{ font-size:13px; }
+      .bar{ min-width: 0; width: 92px; height:8px; }
+      .chip{ font-size:10px; padding:4px 6px; }
+    }
+      .intro-human{ top: 96px; font-size: 64px; }
+      .intro-fork{ top: 142px; font-size: 36px; right: 70px; }
+      .intro-dawg{ top: 116px; font-size: 76px; }
+    }
+
+    /* Compact leaderboard table on phones (aim: no horizontal scroll for most) */
+    @media (max-width: 520px){
+      .table-wrap{ margin-top: 8px; }
+      table{ min-width: 0; font-size: 12px; }
+      thead th{ padding: 8px 8px; font-size:10px; }
+      tbody td{ padding: 10px 8px; }
+
+      .rank{ width: 42px; font-size:11px; }
+      .namecell{ min-width: 170px; gap:8px; }
+      .avatar{ width:28px; height:28px; border-radius:10px; }
+      .name b{ font-size:12px; }
+      .name span{
+        max-width: 140px;
+        overflow:hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display:block;
+      }
+
+      .count{ font-size:13px; }
+      .bar{ min-width: 92px; height:8px; }
+      .chip{ font-size:10px; padding:4px 6px; }
+    }
+
   </style>
 </head>
 
@@ -480,7 +632,7 @@
 
         <div class="pill">
           <label for="q">Search</label>
-          <input id="q" type="search" placeholder="Name or email…" />
+          <input id="q" type="search" placeholder="Search name…" />
         </div>
 
         <button class="btn" id="refreshNow" title="Fetch latest sheet data now">REFRESH NOW</button>
@@ -591,6 +743,14 @@
     </div>
   </main>
 
+
+  <div class="intro-scene" id="introScene" aria-hidden="true">
+    <div class="intro-caption">A wild dawg appears… (oh no)</div>
+    <div class="intro-human">😋</div>
+    <div class="intro-fork">🍴</div>
+    <div class="intro-dawg">🌭</div>
+  </div>
+
   <div class="confetti" id="confetti"></div>
   <div class="toast" id="toast"></div>
 
@@ -638,7 +798,22 @@ const HECKLES_MILD = [
   "One dog today = one less personality trait tomorrow. Choose wisely.",
   "Post a dog. Feed the spreadsheet. Obey the Dawgocracy.",
   "You don’t need motivation — you need mustard.",
-  "This leaderboard won’t fix your problems, but it will expose them."
+  "This leaderboard won’t fix your problems, but it will expose them.",
+  "Consider this your gentle nudge toward a bun.",
+  "The tally is hungry. So should you be.",
+  "If you’re reading this, you have time to eat a dog.",
+  "A hot dog is cheaper than therapy. Allegedly.",
+  "Your future self wants the points.",
+  "No shame, just… mild concern.",
+  "Friendly reminder: the bun remembers.",
+  "Do it for the spreadsheet. It’s doing its best.",
+  "One photo = one less excuse.",
+  "We believe in you (barely).",
+  "Momentum starts with one dog.",
+  "Today’s forecast: 90% chance of mustard.",
+  "If you can scroll this, you can chew.",
+  "Buns before grudges.",
+  "Be the person your tally thinks you are."
 ];
 
 const HECKLES_SPICY = [
@@ -646,7 +821,22 @@ const HECKLES_SPICY = [
   "At this point the bun has more ambition than you do.",
   "If you don’t post a dog soon, we’re filing you under ‘mythical creature.’",
   "Your count is low enough to be a rumor. Make it real.",
-  "Stop spectating. Start chewing. The spreadsheet wants blood (ketchup)."
+  "Stop spectating. Start chewing. The spreadsheet wants blood (ketchup).",
+  "Your tally is embarrassing in a very fixable way.",
+  "The leaderboard called. It asked if you’re okay.",
+  "You’re acting like hot dogs are a conspiracy. Eat one.",
+  "Right now you’re losing to people with mustard on their sleeves.",
+  "You’re not behind. You’re just… aggressively not trying.",
+  "We can’t respect your excuses and your bunlessness at the same time.",
+  "Post one dog. Minimum. Then talk.",
+  "Your points are giving ‘AFK’.",
+  "If you’re last, at least be last with pride (and ketchup).",
+  "This is a competition, not a silent retreat.",
+  "Your hunger is fictional. Prove it isn’t.",
+  "We’ve seen plants with more drive.",
+  "The spreadsheet is disappointed but still hopeful. Barely.",
+  "No dog? No peace.",
+  "Stop being a background character in your own bun story."
 ];
 
 /* =========================
@@ -689,6 +879,19 @@ function initials(nameOrEmail){
   const parts = s.split(/\s+/).filter(Boolean);
   if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
   return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+}
+
+function pseudonymFromEmail(email){
+  // Stable, short code so we never show emails in the UI.
+  const e = String(email || "");
+  if(!e) return "Mystery Dawg";
+  let h = 2166136261;
+  for(let i=0;i<e.length;i++){
+    h ^= e.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  const code = (h >>> 0) % 1000;
+  return "Dawg " + String(code).padStart(3, "0");
 }
 
 function parseDate(s){
@@ -737,19 +940,19 @@ async function copyText(s){
 function confettiBurst(){
   const root = $("#confetti");
   root.innerHTML = "";
-  const n = 90;
-  for(let i=0;i<n;i++) {
+  const n = 150;
+  for(let i=0;i<n;i++){
     const p = document.createElement("i");
-    p.style.left = (Math.random()*100) + "vw";
-    p.style.animationDelay = (Math.random()*0.15) + "s";
-    p.style.width = (6 + Math.random()*8) + "px";
-    p.style.height = (10 + Math.random()*14) + "px";
     const roll = Math.random();
-    const color = roll < .34 ? "var(--mustard)" : (roll < .67 ? "var(--ketchup)" : "var(--relish)");
-    p.style.background = color;
+    p.textContent = roll < 0.78 ? "🌭" : (roll < 0.92 ? "✨" : "💫");
+    p.style.left = (Math.random()*100) + "vw";
+    p.style.setProperty("--drift", ((Math.random()*2-1)*140).toFixed(0) + "px");
+    p.style.animationDelay = (Math.random()*0.35) + "s";
+    p.style.animationDuration = (1.7 + Math.random()*1.6) + "s";
+    p.style.fontSize = (18 + Math.random()*20) + "px";
     root.appendChild(p);
   }
-  setTimeout(()=>root.innerHTML="", 1800);
+  setTimeout(()=>root.innerHTML="", 3600);
 }
 
 function animateInt(el, toValue){
@@ -792,6 +995,9 @@ function randFromSeed(seed){
 }
 
 function pickComment(name, spicy, submissionKey, usedSet){
+  // Rotate commentary daily so the feed doesn't get stale over the year.
+  const day = dailySeed();
+
   const POOL_MILD = [
     "Spreadsheet fed. Society improved.",
     "Bun integrity: strong. Commitment: stronger.",
@@ -812,7 +1018,47 @@ function pickComment(name, spicy, submissionKey, usedSet){
     "Shoutout to the bun for showing up today.",
     "Absolute professionalism (for a hot dog photo).",
     "Your future self will thank you (maybe).",
-    "Pure “I had things to prove” energy."
+    "Pure “I had things to prove” energy.",
+    "We are witnessing bun-based excellence.",
+    "The dog looks innocent. The intentions do not.",
+    "This is quality documentation. A+ compliance.",
+    "That’s a clean +1. Efficient, ruthless, beautiful.",
+    "A dog so confident it could host a podcast.",
+    "The bun clocked in. The dog clocked out.",
+    "This is what ‘showing up’ looks like.",
+    "A tasteful amount of chaos. Respect.",
+    "This dog has ‘team player’ energy.",
+    "It’s giving: steady progress, elite focus.",
+    "Not a meal. A lifestyle update.",
+    "You understood the social contract: photo or it didn’t happen.",
+    "High effort bun work. The people notice.",
+    "This is a public service announcement in edible form.",
+    "The spreadsheet is purring.",
+    "No notes. Only applause. And mustard.",
+    "This dog has big ‘promotion packet’ vibes.",
+    "The angles? The confidence? The receipts? Perfect.",
+    "A glorious little crime of convenience.",
+    "The bun-to-dog ratio is between you and your conscience.",
+    "We love a consistent contributor.",
+    "This is a healthy relationship with documentation.",
+    "The dog looks like it was assembled with purpose.",
+    "This is what victory smells like (a little).",
+    "A calm, steady climb. We see it.",
+    "Absolute bun discipline. Rare trait.",
+    "The condiments are tasteful. The ambition is not subtle.",
+    "Iconic. Appropriate. Spreadsheet-worthy.",
+    "This is the kind of evidence historians will study.",
+    "You posted like a professional. Disturbing. Admirable.",
+    "A dog that says “I have my life together.”",
+    "Sensible. Efficient. Deliciously recorded.",
+    "A well-documented win.",
+    "That’s a dog with good posture.",
+    "A dog that makes other dogs feel insecure.",
+    "The bun did not come to play.",
+    "The dog is humble. The result is not.",
+    "Clean craftsmanship. Zero drama. Perfect.",
+    "This is how you build a legacy: one bun at a time.",
+    "We accept this offering."
   ];
 
   const POOL_SPICY = [
@@ -835,7 +1081,46 @@ function pickComment(name, spicy, submissionKey, usedSet){
     "You posted like you were mad at mercy.",
     "A hot dog photo so bold it needs a PR team.",
     "Main character at the food court. I see you.",
-    "Every bite sounded like a victory speech."
+    "Every bite sounded like a victory speech.",
+    "This is borderline heroic (and slightly alarming).",
+    "That dog didn’t stand a chance. Neither will your opponents.",
+    "You’re not eating — you’re making a statement.",
+    "This is the energy that ruins group chats (in a good way).",
+    "The bun is scared. The leaderboard is shaking.",
+    "That’s not documentation — that’s intimidation.",
+    "The dog was deleted. The receipt remains.",
+    "You’re feeding the spreadsheet like it owes you money.",
+    "This is what ‘pressure’ looks like.",
+    "You’re not competing. You’re threatening.",
+    "Absolute menace behavior. Compliment. Again.",
+    "This dog got treated like an inbox at 4:59pm.",
+    "You are doing damage. Respectfully.",
+    "That’s a ‘do not invite me to brunch’ photo.",
+    "You posted a dog like you had beef with carbs.",
+    "The condiments are loud. You are louder.",
+    "That bun is a hostage situation.",
+    "This is bun-based domination.",
+    "A dog so aggressive it should come with a warning label.",
+    "You’re speedrunning the year and it shows.",
+    "This is why other people feel unsafe (hungry).",
+    "This looks like it was eaten with intent.",
+    "If the leaderboard had emotions, it would be crying.",
+    "You’re not here to participate. You’re here to conquer.",
+    "This is how legends get created (and arteries get tested).",
+    "The photo screams “I’m not sorry.” Incredible.",
+    "The bun said “please.” You said “no.”",
+    "This is what ‘competitive spirit’ looks like in HD.",
+    "You’re cooking with disrespect.",
+    "The dog was an innocent bystander.",
+    "This is a hostile takeover of lunchtime.",
+    "You posted that like it’s evidence in court. Dangerous.",
+    "The spreadsheet is begging for mercy.",
+    "That’s a “watch me” dog.",
+    "This is pure leaderboard violence (ketchup edition).",
+    "You are a problem. For everyone else.",
+    "That’s not a dog — that’s a declaration.",
+    "Bun confidence at historic highs.",
+    "This is why they invented tallies."
   ];
 
   const EXTRAS_MILD = [
@@ -848,7 +1133,13 @@ function pickComment(name, spicy, submissionKey, usedSet){
     `${name} is making the rest of us look lazy.`,
     `${name} came, saw, and chewed.`,
     `${name} is keeping it honest.`,
-    `${name} is putting points on the board.`
+    `${name} is putting points on the board.`,
+    `${name} is practicing consistency like a pro.`,
+    `${name} is making ‘steady’ look scary.`,
+    `${name} is bringing disciplined bun energy.`,
+    `${name} is doing the right thing (for the spreadsheet).`,
+    `${name} is setting an example (unfortunately).`,
+    `${name} is adding lore to this competition.`
   ];
 
   const EXTRAS_SPICY = [
@@ -861,28 +1152,48 @@ function pickComment(name, spicy, submissionKey, usedSet){
     `${name} is doing damage (to the leaderboard).`,
     `${name} is cooking with disrespect.`,
     `${name} is out here collecting receipts.`,
-    `${name} is a problem (for everyone else).`
+    `${name} is a problem (for everyone else).`,
+    `${name} is turning lunch into a spectacle.`,
+    `${name} is bullying the standings.`,
+    `${name} is running up the score.`,
+    `${name} is making the rest of you nervous.`,
+    `${name} is choosing violence (mustard).`,
+    `${name} is behaving like a final boss.`
   ];
 
   const pool = spicy ? POOL_SPICY : POOL_MILD;
   const extras = spicy ? EXTRAS_SPICY : EXTRAS_MILD;
 
   const key = String(submissionKey || name || "");
-  const seed = hashSeed(key);
+  // Include day + spicy toggle so the same submission gets new lines over time.
+  const seed = hashSeed(key + "|" + day + "|" + (spicy ? "S" : "M"));
   let r = randFromSeed(seed);
   let idx = Math.floor(r * pool.length);
 
   if (usedSet && usedSet.has(idx)) {
-    idx = (idx + 1 + Math.floor(r * 7)) % pool.length;
+    // bump deterministically to avoid duplicates in the visible feed
+    idx = (idx + 1 + Math.floor(r * 11)) % pool.length;
   }
   if (usedSet) usedSet.add(idx);
 
   let base = pool[idx];
+
+  // 65% chance of an extra line
   r = randFromSeed(seed ^ 0x9E3779B9);
-  if (r < 0.55) {
+  if (r < 0.65) {
     const j = Math.floor(randFromSeed(seed ^ 0x85EBCA6B) * extras.length);
     base = `${base} ${extras[j]}`;
   }
+
+  // 18% chance of a quick kicker line
+  r = randFromSeed(seed ^ 0xC2B2AE35);
+  if (r < 0.18) {
+    const kickers = spicy
+      ? ["No witnesses. Only buns.", "The spreadsheet saw everything.", "This is why we can’t have nice diets.", "Another one. Again. Relentless."]
+      : ["Strong showing.", "Good form.", "Certified.", "We accept this offering."];
+    base = `${base} ${kickers[Math.floor(randFromSeed(seed ^ 0x27D4EB2F) * kickers.length)]}`;
+  }
+
   return base;
 }
 
@@ -944,15 +1255,19 @@ function buildDailyQuote(rows, subs){
 /* =========================
    CALL OUTS
 ========================= */
-function buildCallout(r, top, spicy){
+function buildCallout(r, topCount, topTies, spicy){
   const d = r.displayName;
   const c = Number(r.count)||0;
-  const delta = (Number(top.count)||0) - c;
+  const delta = (Number(topCount)||0) - c;
 
-  if(r.email === top.email){
+  if((Number(topCount)||0) === c){
     return spicy
-      ? `🚨 TOP DAWG 🚨 ${d} is eating like they hate peace (${c}). Bow to the bun.`
-      : `🌭 Top Dawg: ${d} leads with ${c}. Respect the bun.`;
+      ? (topTies && topTies.length > 1
+          ? `🚨 TOP DAWG TIE 🚨 ${d} is leading (${c}). Shared crown. Shared shame for everyone else.`
+          : `🚨 TOP DAWG 🚨 ${d} is eating like they hate peace (${c}). Bow to the bun.`)
+      : (topTies && topTies.length > 1
+          ? `🌭 Top Dawg (Tie): ${d} leads with ${c}.`
+          : `🌭 Top Dawg: ${d} leads with ${c}. Respect the bun.`);
   }
   if(delta <= 2 && delta >= 0){
     return spicy
@@ -965,8 +1280,8 @@ function buildCallout(r, top, spicy){
       : `${d}, we miss your dawgs. (${c} total.) Post one soon.`;
   }
   return spicy
-    ? `${d} has ${c} on the board. That’s fine… but the top Dawg has ${top.count}. Choose violence (mustard).`
-    : `${d} has ${c}. Top is ${top.count}. Plenty of runway — go get it.`;
+    ? `${d} has ${c} on the board. That’s fine… but the top Dawg has ${topCount}. Choose violence (mustard).`
+    : `${d} has ${c}. Top is ${topCount}. Plenty of runway — go get it.`;
 }
 
 /* =========================
@@ -1099,7 +1414,7 @@ function compute(scopeDays){
   const rows = (PARTICIPANTS || [])
     .map(p => ({
       ...p,
-      displayName: (p.name && p.name.trim()) ? p.name.trim() : (p.email || "Unknown"),
+      displayName: (p.name && p.name.trim()) ? p.name.trim() : pseudonymFromEmail(p.email),
       lastSeen: lastByEmail.get(p.email) || null
     }))
     .sort((a,b)=> (Number(b.count)||0) - (Number(a.count)||0) || (a.displayName||"").localeCompare(b.displayName||""));
@@ -1107,13 +1422,15 @@ function compute(scopeDays){
   const totalDogs = rows.reduce((acc,r)=>acc + (Number(r.count)||0), 0);
   const top = rows[0] || {displayName:"—", count:0, email:""};
 
-  return {rows, subs, totalDogs, top};
+  const topCount = Number(top.count)||0;
+  const topTies = rows.filter(x => (Number(x.count)||0) === topCount);
+  return {rows, subs, totalDogs, top, topCount, topTies};
 }
 
 function render(){
   const scope = $("#scope").value;
   const q = ($("#q").value || "").trim().toLowerCase();
-  const {rows, subs, totalDogs, top} = compute(scope);
+  const {rows, subs, totalDogs, top, topCount, topTies} = compute(scope);
 
   // header
   $("#asof").textContent = `Live from Google Sheets • Scope: ${scope === "all" ? "All time" : `last ${scope} days`} • Tabs: "${TAB_TALLY}", "${TAB_RESPONSES}"`;
@@ -1123,7 +1440,16 @@ function render(){
 
   // stats
   animateInt($("#totalDogs"), totalDogs);
-  $("#topDawg").textContent = `${top.displayName} (${top.count})`;
+  (function(){
+    if(!topTies || topTies.length <= 1){
+      $("#topDawg").textContent = `${top.displayName} (${topCount})`;
+      return;
+    }
+    const names = topTies.map(x => x.displayName).filter(Boolean);
+    const shown = names.slice(0,2).join(" & ");
+    const more = names.length > 2 ? ` +${names.length-2}` : "";
+    $("#topDawg").textContent = `Tie: ${shown}${more} (${topCount})`;
+  })();
 
   const start = new Date("2026-01-01T00:00:00");
   const end = new Date("2026-12-31T23:59:59");
@@ -1145,17 +1471,31 @@ function render(){
   // leaderboard filter
   const filtered = rows.filter(r => {
     const a = (r.displayName||"").toLowerCase();
-    const b = (r.email||"").toLowerCase();
-    return !q || a.includes(q) || b.includes(q);
+    return !q || a.includes(q);
   });
 
-  const max = rows.length ? (Number(rows[0].count)||1) : 1;
+const max = rows.length ? (Number(rows[0].count)||1) : 1;
   const tbody = $("#tbody");
   tbody.innerHTML = "";
 
+  const freqByCount = new Map();
+  rows.forEach(rr => {
+    const c = Number(rr.count)||0;
+    freqByCount.set(c, (freqByCount.get(c)||0)+1);
+  });
+
+  let prevCount = null;
+  let prevRank = 0;
+
   filtered.forEach((r, idx) => {
     const tr = document.createElement("tr");
-    const rank = idx + 1;
+    const cNow = Number(r.count)||0;
+    const rank = (prevCount === cNow) ? prevRank : (idx + 1);
+    prevCount = cNow;
+    prevRank = rank;
+
+    const isTied = (freqByCount.get(cNow) || 0) > 1;
+    const rankLabel = isTied ? `T#${rank}` : `#${rank}`;
 
     const firstPhoto = (subs.find(s=>s.email===r.email)?.photo)||"";
     const id = driveIdFromUrl(firstPhoto);
@@ -1165,13 +1505,13 @@ function render(){
     const pct = max ? Math.max(2, Math.round(((Number(r.count)||0) / max) * 100)) : 0;
 
     tr.innerHTML = `
-      <td class="rank">#${rank}</td>
+      <td class="rank">${rankLabel}</td>
       <td>
         <div class="namecell">
           <div class="avatar">${ava}</div>
           <div class="name">
             <b>${escapeHtml(r.displayName)}</b>
-            <span>${escapeHtml(r.email)}</span>
+            
           </div>
         </div>
       </td>
@@ -1185,7 +1525,7 @@ function render(){
     `;
 
     tr.addEventListener("click", () => {
-      copyText(buildCallout(r, top, spicyOn()));
+      copyText(buildCallout(r, topCount, topTies, spicyOn()));
     });
 
     tbody.appendChild(tr);
@@ -1199,7 +1539,7 @@ function render(){
 
   const usedComments = new Set();
   useSubs.forEach((s) => {
-    const name = (s.name && s.name.trim()) ? s.name.trim() : (rows.find(p=>p.email===s.email)?.displayName || s.email || "Unknown");
+    const name = (s.name && s.name.trim()) ? s.name.trim() : (rows.find(p=>p.email===s.email)?.displayName || pseudonymFromEmail(s.email));
     const thumb = s.photo ? driveThumb(s.photo) : null;
     const comment = pickComment(name, spicyOn(), `${s.email}|${s.ts}|${s.photo}`, usedComments);
 
@@ -1242,9 +1582,15 @@ function render(){
   const heckles = $("#heckles");
   heckles.innerHTML = "";
   const pool = spicyOn() ? HECKLES_SPICY : HECKLES_MILD;
-  pool.slice(0,5).forEach(h => {
+  // Pick 5 heckles deterministically per day so it feels fresh without flickering each render.
+  const r = seededRandFromString(dailySeed() + (spicyOn() ? "|hs" : "|hm"));
+  const idxs = new Set();
+  while(idxs.size < Math.min(5, pool.length)){
+    idxs.add(Math.floor(r() * pool.length));
+  }
+  Array.from(idxs).forEach(i => {
     const li = document.createElement("li");
-    li.textContent = h;
+    li.textContent = pool[i];
     heckles.appendChild(li);
   });
 }
@@ -1262,8 +1608,14 @@ $("#spicy").addEventListener("change", () => {
 
 $("#celebrate").addEventListener("click", () => {
   confettiBurst();
-  const {top} = compute($("#scope").value);
-  showToast(`All hail ${top.displayName} 🏆`);
+  const {top, topCount, topTies} = compute($("#scope").value);
+  if(topTies && topTies.length > 1){
+    const names = topTies.map(x => x.displayName).slice(0,3);
+    const more = topTies.length > 3 ? ` +${topTies.length-3}` : "";
+    showToast(`All hail ${names.join(" & ")}${more} 🏆 (tie at ${topCount})`);
+  }else{
+    showToast(`All hail ${top.displayName} 🏆`);
+  }
 });
 
 $("#refreshNow").addEventListener("click", () => {
@@ -1288,6 +1640,15 @@ document.addEventListener("keydown", (e) => {
 ========================= */
 render();
 showToast("Spicy Mode: ON 🌶️");
+
+// Intro animation: fly a dawg into a hungry human, then remove.
+(function(){
+  const scene = document.getElementById("introScene");
+  if(!scene) return;
+  // Let it play longer, then fade out + remove
+  setTimeout(() => scene.classList.add("done"), 3900);
+  setTimeout(() => scene.remove(), 4400);
+})();
 loadLiveData();
 setInterval(loadLiveData, AUTO_REFRESH_MIN * 60 * 1000);
 </script>
