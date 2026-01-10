@@ -442,17 +442,24 @@
     }
     .confetti i{
       position:absolute;
-      width:10px;height:16px;
-      background: var(--mustard);
+      font-size: 24px;
+      line-height: 1;
+      background: none;
+      width:auto;height:auto;
       opacity:.95;
-      transform: translateY(-10vh) rotate(0deg);
-      animation: fall 1.4s linear forwards;
-      border-radius: 3px;
-      filter: drop-shadow(0 6px 12px rgba(0,0,0,.4));
+      transform: translate3d(0,-12vh,0) rotate(0deg);
+      animation: fallEmoji 1.9s linear forwards;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,.45));
+      user-select:none;
+      will-change: transform;
     }
-    @keyframes fall{
-      to{ transform: translateY(110vh) rotate(520deg); opacity:1; }
+    @keyframes fallEmoji{
+      to{
+        transform: translate3d(var(--drift, 0px), 110vh, 0) rotate(540deg);
+        opacity:1;
+      }
     }
+}
   
     
     /* Intro animation: flying dawg gets eaten */
@@ -511,11 +518,11 @@
 
     .intro-dawg{
       position:absolute;
-      left: -80px;
-      top: 140px;
-      font-size: 54px;
-      filter: drop-shadow(0 14px 34px rgba(0,0,0,.55));
-      animation: dawgFly 1.9s cubic-bezier(.2,.9,.2,1) forwards .15s;
+      left: -110px;
+      top: 128px;
+      font-size: 86px;
+      filter: drop-shadow(0 16px 38px rgba(0,0,0,.60));
+      animation: dawgFly 3.2s cubic-bezier(.2,.9,.2,1) forwards .15s;
     }
     .intro-dawg::after{
       content:"";
@@ -531,17 +538,46 @@
       opacity: .9;
     }
     @keyframes dawgFly{
-      0%{ transform: translateX(-10vw) rotate(-12deg) scale(1); }
-      65%{ transform: translateX(calc(74vw)) rotate(8deg) scale(1.05); }
-      78%{ transform: translateX(calc(80vw)) rotate(2deg) scale(1.02); }
-      100%{ transform: translateX(calc(84vw)) rotate(0deg) scale(.15); opacity: 0; }
+      0%{ transform: translateX(-10vw) rotate(-14deg) scale(1); opacity: 1; }
+      70%{ transform: translateX(calc(74vw)) rotate(10deg) scale(1.10); opacity: 1; }
+      88%{ transform: translateX(calc(82vw)) rotate(4deg) scale(.62); opacity: 1; }
+      100%{ transform: translateX(calc(84vw)) rotate(0deg) scale(.28); opacity: 0; }
     }
 
     @media (max-width: 520px){
-      .intro-caption{ top: 72px; }
-      .intro-human{ top: 96px; font-size: 56px; }
+      .table-wrap{ margin-top: 8px; }
+      table{
+        min-width: 0;
+        font-size: 12px;
+        table-layout: fixed;
+      }
+      thead th{ padding: 8px 8px; font-size:10px; }
+      tbody td{ padding: 10px 8px; }
+
+      thead th:nth-child(1){ width: 44px; }
+      thead th:nth-child(3){ width: 54px; }
+      thead th:nth-child(4){ width: 92px; }
+      thead th:nth-child(5){ width: 92px; }
+
+      .rank{ width: 44px; font-size:11px; }
+      .namecell{ min-width: 0; gap:8px; }
+      .avatar{ width:28px; height:28px; border-radius:10px; }
+      .name b{ font-size:12px; }
+      .name span{
+        max-width: 150px;
+        overflow:hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display:block;
+      }
+
+      .count{ font-size:13px; }
+      .bar{ min-width: 0; width: 92px; height:8px; }
+      .chip{ font-size:10px; padding:4px 6px; }
+    }
+      .intro-human{ top: 96px; font-size: 64px; }
       .intro-fork{ top: 142px; font-size: 36px; right: 70px; }
-      .intro-dawg{ top: 120px; font-size: 48px; }
+      .intro-dawg{ top: 116px; font-size: 76px; }
     }
 
     /* Compact leaderboard table on phones (aim: no horizontal scroll for most) */
@@ -890,19 +926,19 @@ async function copyText(s){
 function confettiBurst(){
   const root = $("#confetti");
   root.innerHTML = "";
-  const n = 90;
-  for(let i=0;i<n;i++) {
+  const n = 150;
+  for(let i=0;i<n;i++){
     const p = document.createElement("i");
-    p.style.left = (Math.random()*100) + "vw";
-    p.style.animationDelay = (Math.random()*0.15) + "s";
-    p.style.width = (6 + Math.random()*8) + "px";
-    p.style.height = (10 + Math.random()*14) + "px";
     const roll = Math.random();
-    const color = roll < .34 ? "var(--mustard)" : (roll < .67 ? "var(--ketchup)" : "var(--relish)");
-    p.style.background = color;
+    p.textContent = roll < 0.78 ? "🌭" : (roll < 0.92 ? "✨" : "💫");
+    p.style.left = (Math.random()*100) + "vw";
+    p.style.setProperty("--drift", ((Math.random()*2-1)*140).toFixed(0) + "px");
+    p.style.animationDelay = (Math.random()*0.35) + "s";
+    p.style.animationDuration = (1.7 + Math.random()*1.6) + "s";
+    p.style.fontSize = (18 + Math.random()*20) + "px";
     root.appendChild(p);
   }
-  setTimeout(()=>root.innerHTML="", 1800);
+  setTimeout(()=>root.innerHTML="", 3600);
 }
 
 function animateInt(el, toValue){
@@ -1560,11 +1596,10 @@ showToast("Spicy Mode: ON 🌶️");
 (function(){
   const scene = document.getElementById("introScene");
   if(!scene) return;
-  // Let it play, then fade out + remove
-  setTimeout(() => scene.classList.add("done"), 2350);
-  setTimeout(() => scene.remove(), 2700);
+  // Let it play longer, then fade out + remove
+  setTimeout(() => scene.classList.add("done"), 3900);
+  setTimeout(() => scene.remove(), 4400);
 })();
-
 loadLiveData();
 setInterval(loadLiveData, AUTO_REFRESH_MIN * 60 * 1000);
 </script>
