@@ -509,44 +509,10 @@
     }
     .table-wrap table{ min-width: 720px; } /* horizontal scroll on phones */
 
-    .mobile-tabs{
-      display:none;
-      position: sticky;
-      top: 64px; /* under the topbar */
-      z-index: 40;
-      margin: 10px 0 14px 0;
-      padding: 8px;
-      border-radius: 16px;
-      background: rgba(17,19,26,.72);
-      border: 1px solid rgba(255,255,255,.08);
-      backdrop-filter: blur(10px);
-      gap: 8px;
-    }
-    .mobile-tabs .tab{
-      flex: 1;
-      cursor: pointer;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      color: var(--muted);
-      padding: 10px 12px;
-      border-radius: 14px;
-      font-weight: 800;
-      letter-spacing: .2px;
-    }
-    .mobile-tabs .tab.active{
-      background: linear-gradient(180deg, rgba(243,193,26,.95), rgba(233,166,0,.92));
-      color: #0b0c10;
-      border-color: rgba(243,193,26,.35);
-      box-shadow: 0 12px 30px rgba(243,193,26,.14);
-    }
-
     @media (max-width: 980px){
       main{ padding-bottom: 64px; } /* room for Safari chrome */
       .mobile-tabs{ display:flex; }
-      .grid{ display:block; }
-      section.card[data-panel]{ display:none; }
-      section.card[data-panel].active{ display:block; }
-      input[type="search"]{ width: 150px; }
+      .grid{ display:block; }input[type="search"]{ width: 150px; }
       .btn{ padding:10px 12px; }
     }
 
@@ -597,11 +563,7 @@
   </div>
 
   <main>
-    <div class="mobile-tabs" role="tablist" aria-label="Dashboard tabs">
-      <button class="tab active" data-panel="leaderboard" role="tab" aria-selected="true">Leaderboard</button>
-      <button class="tab" data-panel="latest" role="tab" aria-selected="false">Latest</button>
-    </div>
-    <div class="grid">
+<div class="grid">
       <!-- LEFT: leaderboard -->
       <section class="card" data-panel="latest" data-panel="leaderboard">
         <div class="card-header">
@@ -883,36 +845,6 @@ function confettiBurst(){
 function spicyOn(){ return $("#spicy").checked; }
 
 /* --- mobile tab UX --- */
-function setActivePanel(panel){
-  const cards = document.querySelectorAll('section.card[data-panel]');
-  cards.forEach(c => c.classList.toggle("active", c.dataset.panel === panel));
-  const tabs = document.querySelectorAll('.mobile-tabs .tab');
-  tabs.forEach(t => {
-    const isOn = t.dataset.panel === panel;
-    t.classList.toggle("active", isOn);
-    t.setAttribute("aria-selected", isOn ? "true" : "false");
-  });
-}
-
-function setupMobileTabs(){
-  const tabs = document.querySelectorAll('.mobile-tabs .tab');
-  tabs.forEach(t => {
-    t.addEventListener("click", () => {
-      const panel = t.dataset.panel;
-      setActivePanel(panel);
-      try{ localStorage.setItem("yotd_panel", panel); }catch(e){}
-      window.scrollTo({top: 0, behavior: "smooth"});
-    });
-  });
-
-  const saved = (() => { try{ return localStorage.getItem("yotd_panel"); }catch(e){ return null; } })();
-  const isMobile = window.matchMedia("(max-width: 980px)").matches;
-  if(isMobile){
-    setActivePanel(saved || "leaderboard");
-  }else{
-    document.querySelectorAll('section.card[data-panel]').forEach(c => c.classList.add("active"));
-  }
-
   window.addEventListener("resize", () => {
     const mobileNow = window.matchMedia("(max-width: 980px)").matches;
     if(mobileNow){
@@ -1453,7 +1385,6 @@ document.addEventListener("keydown", (e) => {
 });
 
 /* --- boot --- */
-setupMobileTabs();
 render();
 showToast("Spicy Mode: ON 🌶️");
 loadLiveData();
