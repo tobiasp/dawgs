@@ -1,0 +1,1395 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Year of the Dawg — Hot Dog Leaderboard</title>
+  <style>
+    :root{
+      --bg:#0b0c10;
+      --card:#11131a;
+      --card2:#0f1218;
+      --text:#eaf0ff;
+      --muted:#9aa6c4;
+      --line:#232a3a;
+
+      /* hot dog palette */
+      --bun:#d7a66e;
+      --bun2:#c98f4e;
+      --sausage:#b34b3f;
+      --ketchup:#d12a2a;
+      --mustard:#f3c11a;
+      --relish:#4ad66d;
+      --neon:#7cffcb;
+      --accent: var(--mustard);
+      --shadow: 0 18px 55px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+
+      /* Hot-dog-party background */
+      background-image:
+        url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27220%27%20height%3D%27220%27%3E%0A%20%20%3Crect%20width%3D%27220%27%20height%3D%27220%27%20fill%3D%27none%27/%3E%0A%20%20%3Ctext%20x%3D%2718%27%20y%3D%2760%27%20font-size%3D%2734%27%3E%F0%9F%8C%AD%3C/text%3E%0A%20%20%3Ctext%20x%3D%27140%27%20y%3D%27170%27%20font-size%3D%2734%27%3E%F0%9F%8C%AD%3C/text%3E%0A%20%20%3Cpath%20d%3D%27M10%20120%20C%2040%2090%2C%2070%20150%2C%20100%20120%20S%20160%20150%2C%20210%20120%27%20fill%3D%27none%27%20stroke%3D%27%23f3c11a%27%20stroke-width%3D%276%27%20stroke-linecap%3D%27round%27%20opacity%3D%27.85%27/%3E%0A%20%20%3Ccircle%20cx%3D%2760%27%20cy%3D%27190%27%20r%3D%276%27%20fill%3D%27%23d12a2a%27%20opacity%3D%27.75%27/%3E%0A%20%20%3Ccircle%20cx%3D%27180%27%20cy%3D%2740%27%20r%3D%276%27%20fill%3D%27%23d12a2a%27%20opacity%3D%27.75%27/%3E%0A%3C/svg%3E"),
+        repeating-linear-gradient(135deg, rgba(243,193,26,.10) 0 14px, rgba(209,42,42,.08) 14px 28px, rgba(74,214,109,.06) 28px 42px),
+        radial-gradient(1200px 800px at 20% -10%, rgba(243,193,26,.22), transparent 55%),
+        radial-gradient(900px 650px at 90% 10%, rgba(209,42,42,.18), transparent 55%),
+        radial-gradient(900px 650px at 70% 110%, rgba(124,255,203,.10), transparent 55%),
+        linear-gradient(180deg, #090a0e 0%, #07080c 100%);
+      background-size:
+        220px 220px,
+        auto,
+        auto,
+        auto,
+        auto,
+        auto,
+        auto;
+      background-repeat:
+        repeat,
+        repeat,
+        no-repeat,
+        no-repeat,
+        no-repeat,
+        no-repeat,
+        no-repeat;
+      background-position:
+        0 0,
+        0 0,
+        0 0,
+        0 0,
+        0 0,
+        0 0,
+        0 0;
+
+      overflow-x:hidden;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter: blur(10px);
+      background: rgba(7,8,12,.62);
+      border-bottom: 1px solid rgba(35,42,58,.7);
+    }
+    .topbar-inner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:14px 18px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+      justify-content:space-between;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      min-width: 280px;
+    }
+    .logo{
+      width:44px;height:44px;border-radius:14px;
+      background:
+        linear-gradient(180deg, rgba(215,166,110,.95), rgba(201,143,78,.92));
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);
+      position:relative;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.06);
+    }
+    .logo:before{
+      content:"";
+      position:absolute; inset:9px 6px;
+      border-radius: 12px;
+      background: linear-gradient(90deg, var(--sausage) 0 100%);
+      box-shadow: inset 0 -10px 14px rgba(0,0,0,.25);
+    }
+    .logo:after{
+      content:"";
+      position:absolute; left:0; right:0; top:0; height:100%;
+      background:
+        repeating-linear-gradient(
+          135deg,
+          rgba(243,193,26,.0) 0 10px,
+          rgba(243,193,26,.0) 10px 18px,
+          rgba(243,193,26,.22) 18px 22px
+        );
+      mix-blend-mode:screen;
+      opacity:.7;
+    }
+    .title h1{
+      margin:0;
+      font-size:16px;
+      letter-spacing:.2px;
+      line-height:1.15;
+    }
+    .title .sub{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:2px;
+    }
+
+    .controls{
+      display:flex; align-items:center; gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .pill{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding:10px 12px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(17,19,26,.55);
+      color: var(--text);
+      box-shadow: 0 10px 25px rgba(0,0,0,.25);
+    }
+    .pill label{font-size:12px;color:var(--muted)}
+    select, input[type="search"]{
+      appearance:none;
+      border:none;
+      outline:none;
+      background: transparent;
+      color: var(--text);
+      font-size:13px;
+      width: 160px;
+    }
+    input[type="search"]{ width: 220px; }
+    .btn{
+      border:none;
+      outline:none;
+      cursor:pointer;
+      border-radius: 999px;
+      padding:10px 12px;
+      color:#0b0c10;
+      background: linear-gradient(180deg, var(--mustard), #e9a600);
+      box-shadow: 0 12px 30px rgba(243,193,26,.18);
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .toggle{
+      display:inline-flex; align-items:center; gap:8px;
+      user-select:none;
+      cursor:pointer;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .toggle input{ accent-color: var(--mustard); }
+
+    main{
+      max-width:1200px;
+      margin:0 auto;
+      padding:18px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:16px;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns:1fr; }
+      .brand{ min-width: unset; }
+      input[type="search"]{ width: 160px; }
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(17,19,26,.92), rgba(13,15,20,.86));
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .card-header{
+      padding:14px 14px 10px 14px;
+      border-bottom: 1px solid rgba(35,42,58,.7);
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .card-header h2{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.2px;
+    }
+    .card-header .hint{
+      font-size:12px;
+      color: var(--muted);
+      text-align:right;
+    }
+    .card-body{ padding:14px; }
+
+    .stats{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+    }
+    @media (max-width: 700px){
+      .stats{ grid-template-columns:1fr; }
+    }
+    .stat{
+      padding:12px;
+      border-radius: 16px;
+      background: rgba(15,18,24,.7);
+      border: 1px solid rgba(255,255,255,.06);
+      position:relative;
+      overflow:hidden;
+    }
+    .stat .k{
+      font-size:12px; color:var(--muted);
+    }
+    .stat .v{
+      margin-top:6px;
+      font-size:18px;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .stat .spark{
+      margin-top:8px;
+      height:8px;
+      border-radius:999px;
+      background: rgba(255,255,255,.06);
+      overflow:hidden;
+    }
+    .stat .spark > span{
+      display:block; height:100%;
+      width:40%;
+      border-radius:999px;
+      background: linear-gradient(90deg, var(--relish), var(--neon));
+      opacity:.9;
+    }
+
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      font-size:13px;
+    }
+    thead th{
+      text-align:left;
+      font-size:11px;
+      color: var(--muted);
+      font-weight:700;
+      letter-spacing:.3px;
+      text-transform:uppercase;
+      padding:10px 10px;
+      border-bottom: 1px solid rgba(35,42,58,.7);
+    }
+    tbody td{
+      padding:12px 10px;
+      border-bottom: 1px solid rgba(35,42,58,.45);
+      vertical-align:middle;
+    }
+    tbody tr:hover{
+      background: rgba(243,193,26,.06);
+    }
+
+    .rank{
+      font-weight:900;
+      font-size:12px;
+      width: 54px;
+      color: var(--mustard);
+    }
+    .namecell{
+      display:flex; align-items:center; gap:10px;
+      min-width: 210px;
+    }
+    .avatar{
+      width:34px; height:34px;
+      border-radius: 12px;
+      display:grid; place-items:center;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      color: var(--text);
+      font-weight:800;
+      font-size:12px;
+      overflow:hidden;
+    }
+    .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .name{
+      display:flex; flex-direction:column;
+      line-height:1.15;
+    }
+    .name b{ font-size:13px; }
+    .name span{ font-size:11px; color: var(--muted); }
+
+    .count{
+      font-weight:900;
+      font-size:14px;
+    }
+
+    .bar{
+      height:10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.06);
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.05);
+      min-width: 140px;
+    }
+    .bar > span{
+      display:block;
+      height:100%;
+      width:10%;
+      border-radius:999px;
+      background: linear-gradient(90deg, var(--ketchup), var(--mustard));
+    }
+
+    .chip{
+      font-size:11px;
+      padding:6px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(15,18,24,.55);
+      color: var(--muted);
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      white-space:nowrap;
+    }
+    .chip strong{ color: var(--text); }
+
+    .feed{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .post{
+      display:grid;
+      grid-template-columns: 128px 1fr;
+      gap:12px;
+      padding:12px;
+      border-radius: 16px;
+      background: rgba(15,18,24,.7);
+      border: 1px solid rgba(255,255,255,.06);
+      overflow:hidden;
+    }
+    .thumb{
+      width:128px;height:128px;border-radius:16px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      overflow:hidden;
+      position:relative;
+    }
+    .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .thumb:after{
+      content:"";
+      position:absolute; inset:0;
+      background: radial-gradient(50px 50px at 20% 10%, rgba(255,255,255,.25), transparent 55%);
+      pointer-events:none;
+    }
+    .post .meta{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .post .meta b{ font-size:13px; }
+    .post .meta .t{ font-size:11px;color:var(--muted); }
+    .post p{
+      margin:6px 0 0 0;
+      color: var(--text);
+      font-size:12.5px;
+      line-height:1.3;
+    }
+    .post a{
+      color: var(--neon);
+      text-decoration:none;
+      font-weight:700;
+      font-size:11px;
+    }
+    .post a:hover{ text-decoration:underline; }
+
+    .two-cols{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    @media (max-width: 700px){
+      .two-cols{ grid-template-columns: 1fr; }
+    }
+
+    .shame{
+      background: linear-gradient(180deg, rgba(209,42,42,.16), rgba(15,18,24,.65));
+      border: 1px solid rgba(209,42,42,.25);
+    }
+    .shame h3{
+      margin:0 0 8px 0;
+      font-size:13px;
+    }
+    .shame .small{ color: var(--muted); font-size:12px; margin:0 0 10px 0;}
+    .shame ul{ margin:0; padding:0 0 0 18px; color: var(--text); }
+    .shame li{ margin:6px 0; }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:18px;
+      transform:translateX(-50%);
+      background: rgba(17,19,26,.92);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      padding:10px 12px;
+      box-shadow: var(--shadow);
+      color: var(--text);
+      font-size:12px;
+      display:none;
+      gap:10px;
+      align-items:center;
+      max-width: 92vw;
+      z-index: 99;
+    }
+    .toast.show{ display:flex; animation: pop .25s ease-out; }
+    @keyframes pop{
+      from{ transform:translateX(-50%) translateY(8px); opacity:0; }
+      to{ transform:translateX(-50%) translateY(0); opacity:1; }
+    }
+
+    /* confetti */
+    .confetti{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index:80;
+    }
+    .confetti i{
+      position:absolute;
+      width:10px;height:16px;
+      background: var(--mustard);
+      opacity:.95;
+      transform: translateY(-10vh) rotate(0deg);
+      animation: fall 1.4s linear forwards;
+      border-radius: 3px;
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,.4));
+    }
+    @keyframes fall{
+      to{
+        transform: translateY(110vh) rotate(520deg);
+        opacity:1;
+      }
+    }
+
+    .footer{
+      margin-top:18px;
+      color: var(--muted);
+      font-size:12px;
+      text-align:center;
+      padding: 10px 0 24px 0;
+    }
+    .footer a{ color: var(--neon); text-decoration:none; font-weight:700; }
+    .footer a:hover{ text-decoration:underline; }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      padding:2px 6px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.35);
+      font-size:11px;
+      color: var(--text);
+    }
+  
+    /* iOS / mobile scroll friendliness */
+    body{
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+      touch-action: pan-y;
+    }
+
+    .table-wrap{
+      overflow-x:auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 16px;
+    }
+    .table-wrap table{ min-width: 720px; } /* horizontal scroll on phones */
+
+    @media (max-width: 980px){
+      main{ padding-bottom: 64px; } /* room for Safari chrome */
+      .mobile-tabs{ display:flex; }
+      .grid{ display:block; }input[type="search"]{ width: 150px; }
+      .btn{ padding:10px 12px; }
+    }
+
+    @media (max-width: 420px){
+      .brand .sub{ display:none; }
+      select{ width: 130px; }
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="title">
+          <h1>Year of the Dawg — Hot Dog Leaderboard</h1>
+          <div class="sub">Eat • Post • Ascend • Repeat. (Competition runs through <b>Dec 31, 2026</b>.)</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="pill">
+          <label for="scope">Scope</label>
+          <select id="scope" title="Filter by time window">
+            <option value="all">All time</option>
+            <option value="7">Last 7 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 90 days</option>
+          </select>
+        </div>
+
+        <div class="pill">
+          <label for="q">Search</label>
+          <input id="q" type="search" placeholder="Name or email…" />
+        </div>
+
+        <button class="btn" id="refreshNow" title="Fetch latest sheet data now">REFRESH NOW</button>
+        <button class="btn" id="celebrate" title="Celebrate the current top Dawg">HAIL THE TOP DAWG</button>
+
+        <label class="toggle" title="Turns up the trash-talk. Stays PG-13-ish.">
+          <input id="spicy" type="checkbox" checked/>
+          Spicy Mode 🌶️
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <main>
+<div class="grid">
+      <!-- LEFT: leaderboard -->
+      <section class="card" data-panel="latest" data-panel="leaderboard">
+        <div class="card-header">
+          <div>
+            <h2>Leaderboard</h2>
+            <div class="hint" id="asof"></div>
+          </div>
+          <div class="hint">
+            Tip: click a row to copy a “callout” to send in chat.
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="stats">
+            <div class="stat">
+              <div class="k">Total Dawgs Logged</div>
+              <div class="v" id="totalDogs">—</div>
+              <div class="spark"><span id="spark1"></span></div>
+            </div>
+            <div class="stat">
+              <div class="k">Top Dawg</div>
+              <div class="v" id="topDawg">—</div>
+              <div class="spark"><span id="spark2"></span></div>
+            </div>
+            <div class="stat">
+              <div class="k">Days Left (to Dec 31, 2026)</div>
+              <div class="v" id="daysLeft">—</div>
+              <div class="spark"><span id="spark3"></span></div>
+            </div>
+          </div>
+
+          <div style="height:12px"></div>
+
+          <div class="stat" style="grid-column: 1 / -1;">
+            <div class="k">Cheesy Dawg Quote of the Day</div>
+            <div class="v" id="dailyQuote" style="font-size:14px; font-weight:800; line-height:1.25;">—</div>
+            <div style="margin-top:8px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="chip">🕒 <strong id="lastRefresh">Not refreshed yet</strong></span>
+              <span class="chip">🔁 Auto-refresh every <strong id="refreshIntervalLabel">5</strong> min</span>
+              <span class="chip">📣 Click a leaderboard row to copy a callout</span>
+            </div>
+          </div>
+
+          <div style="height:12px"></div>
+
+          <div class="table-wrap" aria-label="Leaderboard scroll area"><table aria-label="Leaderboard table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Dawg</th>
+                <th>Count</th>
+                <th>Heat</th>
+                <th>Last Seen</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- RIGHT: latest submissions + shame board -->
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h2>Latest Submissions</h2>
+            <div class="hint">Fresh dawgs, fresh receipts.</div>
+          </div>
+          <div class="hint"><span class="chip">🔥 <strong id="latestCount">—</strong> recent posts</span></div>
+        </div>
+        <div class="card-body">
+          <div class="feed" id="feed"></div>
+
+          <div style="height:12px"></div>
+
+          <div class="card shame">
+            <div class="card-body">
+              <h3>Hall of (Friendly) Shame</h3>
+              <p class="small">Low counts only. This is peer pressure with a warm hug.</p>
+              <div class="two-cols">
+                <div>
+                  <div class="chip">🥶 Cold bun energy</div>
+                  <ul id="shameList"></ul>
+                </div>
+                <div>
+                  <div class="chip">📣 Suggested heckles</div>
+                  <ul id="heckles"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </div>
+
+    <div class="footer">
+      Data source: <a href="https://docs.google.com/spreadsheets/d/17Y2SosZ5wmAjsB1FUyr2AOy3r7-PjMdOC1Mfhkur4ws" target="_blank" rel="noreferrer">Year of the Dawg (Responses)</a>.
+      <br/>
+      If images don’t load, you likely need Drive access in your browser (or publish thumbnails). In a pinch, click the “Open” link on any post.
+      <br/>
+      Keyboard: <span class="kbd">/</span> focuses search, <span class="kbd">Esc</span> clears it.
+    </div>
+  </main>
+
+  <div class="confetti" id="confetti"></div>
+  <div class="toast" id="toast"></div>
+
+
+<script>
+/**
+ * Year of the Dawg — live dashboard (single-file, no build step).
+ *
+ * Data sources (Google Sheets):
+ * - Active Tally tab: running counts per person
+ * - Form Responses tab: individual submission rows (timestamp + photo + email + name)
+ *
+ * Tabs confirmed in the sheet: "Active Tally" and "Form Responses". (There is also a Rules tab.)
+ */
+
+/* --- CONFIG --- */
+const SHEET_ID = "17Y2SosZ5wmAjsB1FUyr2AOy3r7-PjMdOC1Mfhkur4ws";
+const TAB_TALLY = "Active Tally";
+const TAB_RESPONSES = "Form Responses";
+
+// Auto refresh interval (minutes)
+const AUTO_REFRESH_MIN = 5;
+
+// Max number of submissions to display in the feed
+const FEED_LIMIT = 10;
+// Max number of submissions to load client-side (keeps it snappy)
+const LOAD_SUBMISSIONS_LIMIT = 300;
+
+/* --- Fallback snapshot (only used if live fetch fails) --- */
+let PARTICIPANTS = [
+  {email:"akushner0@gmail.com", name:"Alexa", count:3},
+  {email:"jacwilso1995@gmail.com", name:"Jacob", count:7},
+  {email:"jackjharding@gmail.com", name:"Jack", count:16},
+  {email:"rcaterson@gmail.com", name:"rosh", count:9},
+  {email:"topolepaige@gmail.com", name:"Paige", count:15},
+  {email:"aditi.narve@gmail.com", name:"Aditi", count:3},
+  {email:"hoperosefaith@gmail.com", name:"Hope", count:4},
+  {email:"brad.faught@gmail.com", name:"Brad Faught", count:5},
+  {email:"mapignone@gmail.com", name:"Meg Pignone", count:8},
+  {email:"ramchandjn89@gmail.com", name:"Ram", count:2},
+  {email:"dshumatejr2@gmail.com", name:"David Shumate", count:1},
+  {email:"mikephamtastic@gmail.com", name:"Mike Pham", count:5},
+  {email:"hadawayh2@gmail.com", name:"Hannah", count:2},
+  {email:"jamilmp20@gmail.com", name:"Jamil Moore-Prewitt", count:6},
+  {email:"maxcobywilson@gmail.com", name:"Max Wilson", count:4},
+  {email:"cflfantasycommish@gmail.com", name:"Zac", count:1},
+  {email:"jacwilso0@gmail.com", name:"unknown", count:1},
+  {email:"renn.maeve@gmail.com", name:"ren", count:5},
+];
+
+let SUBMISSIONS = [
+  {ts:"2026-01-09 19:55:43.761000", photo:"https://drive.google.com/open?id=119vwDK4Gu8ZJ9uqnFwVocr0Ay6LcwcwS", email:"jackjharding@gmail.com", name:"Jack"}
+];
+
+/* --- UI strings --- */
+const HECKLES_MILD = [
+  "Not saying you’ve got cold bun energy… but your bun is literally room temp.",
+  "One dog today = one less personality trait tomorrow. Choose wisely.",
+  "Post a dog. Feed the spreadsheet. Obey the Dawgocracy.",
+  "You don’t need motivation — you need mustard.",
+  "This leaderboard won’t fix your problems, but it will expose them."
+];
+const HECKLES_SPICY = [
+  "You’re not ‘saving room’ — you’re dodging greatness. Fix it.",
+  "At this point the bun has more ambition than you do.",
+  "If you don’t post a dog soon, we’re filing you under ‘mythical creature.’",
+  "Your count is low enough to be a rumor. Make it real.",
+  "Stop spectating. Start chewing. The spreadsheet wants blood (ketchup)."
+];
+
+const COMMENTARY_MILD = [
+  "A clean, respectful dog. Spreadsheet-approved.",
+  "Certified bun work. No notes.",
+  "Ketchup? Mustard? Chaos? We love a balanced portfolio.",
+  "That dog had a family. (It doesn’t anymore.)",
+  "Another receipt for the Dawgocracy archives."
+];
+const COMMENTARY_SPICY = [
+  "Unhinged hot dog conduct. We respect the audacity.",
+  "That dog just got speedrun’d. No survivors. Iconic.",
+  "This isn’t lunch — it’s a power move with condiments.",
+  "Violent bun energy. Absolutely feral. Love that for you.",
+  "You ate like you’re trying to frighten the leaderboard. Effective."
+];
+
+/* --- helpers --- */
+const $ = (sel) => document.querySelector(sel);
+const parseDate = (s) => {
+  if (s instanceof Date) return s;
+  if (typeof s === "number") return new Date(s);
+  const str = String(s ?? "").trim();
+  if (!str) return new Date(NaN);
+
+  // Google GViz sometimes returns Date(YYYY,MM,DD,hh,mm,ss)
+  const m = str.match(/^Date\((\d+),(\d+),(\d+)(?:,(\d+),(\d+),(\d+))?\)$/);
+  if (m) {
+    return new Date(
+      Number(m[1]),
+      Number(m[2]),
+      Number(m[3]),
+      Number(m[4] || 0),
+      Number(m[5] || 0),
+      Number(m[6] || 0)
+    );
+  }
+
+  // If looks like "YYYY-MM-DD HH:MM:SS(.sss)" convert to ISO-ish (local)
+  let cleaned = str.replace(/\.\d+$/, "");
+  if (/^\d{4}-\d{2}-\d{2}\s+\d/.test(cleaned)) cleaned = cleaned.replace(" ", "T");
+
+  let d = new Date(cleaned);
+  if (!isNaN(d.getTime())) return d;
+
+  // Try UTC ISO as fallback
+  d = new Date(cleaned + "Z");
+  return d;
+};
+
+const fmtDate = (s) => {
+  const d = parseDate(s);
+  if (!d || isNaN(d.getTime())) return String(s ?? "");
+  return d.toLocaleString([], {month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"});
+};
+const initials = (nameOrEmail) => {
+  const s = (nameOrEmail || "").trim();
+  if(!s) return "??";
+  const parts = s.split(/\s+/).filter(Boolean);
+  if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
+  return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+};
+
+function driveIdFromUrl(url){
+  const m = String(url||"").match(/[?&]id=([^&]+)/);
+  return m ? m[1] : null;
+}
+function driveThumb(url){
+  const id = driveIdFromUrl(url);
+  if(!id) return null;
+  return `https://drive.google.com/thumbnail?id=${id}&sz=w300-h300`;
+}
+
+function showToast(msg){
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(()=>t.classList.remove("show"), 2400);
+}
+async function copyText(s){
+  try{
+    await navigator.clipboard.writeText(s);
+    showToast("Copied spicy encouragement 🌭");
+  }catch(e){
+    showToast("Couldn’t copy (browser blocked clipboard).");
+  }
+}
+
+function confettiBurst(){
+  const root = $("#confetti");
+  root.innerHTML = "";
+  const n = 90;
+  for(let i=0;i<n;i++){
+    const p = document.createElement("i");
+    p.style.left = (Math.random()*100) + "vw";
+    p.style.animationDelay = (Math.random()*0.15) + "s";
+    p.style.width = (6 + Math.random()*8) + "px";
+    p.style.height = (10 + Math.random()*14) + "px";
+    const roll = Math.random();
+    const color = roll < .34 ? "var(--mustard)" : (roll < .67 ? "var(--ketchup)" : "var(--relish)");
+    p.style.background = color;
+    root.appendChild(p);
+  }
+  setTimeout(()=>root.innerHTML="", 1800);
+}
+
+function spicyOn(){ return $("#spicy").checked; }
+
+/* --- mobile tab UX --- */
+  window.addEventListener("resize", () => {
+    const mobileNow = window.matchMedia("(max-width: 980px)").matches;
+    if(mobileNow){
+      setActivePanel((() => { try{ return localStorage.getItem("yotd_panel"); }catch(e){ return "leaderboard"; } })() || "leaderboard");
+    }else{
+      document.querySelectorAll('section.card[data-panel]').forEach(c => c.classList.add("active"));
+    }
+  });
+}
+
+/* --- tiny number animation for stats --- */
+function animateInt(el, toValue){
+  const to = Number(toValue) || 0;
+  const from = Number(el.dataset.v || String(el.textContent || "0").replace(/,/g,"")) || 0;
+  if(from === to){
+    el.dataset.v = String(to);
+    el.textContent = to.toLocaleString();
+    return;
+  }
+  const start = performance.now();
+  const dur = 420;
+  function step(now){
+    const t = Math.min(1, (now - start) / dur);
+    const eased = 1 - Math.pow(1 - t, 3);
+    const v = Math.round(from + (to - from) * eased);
+    el.textContent = v.toLocaleString();
+    if(t < 1) requestAnimationFrame(step);
+    else el.dataset.v = String(to);
+  }
+  requestAnimationFrame(step);
+}
+
+/* --- Google Sheets (GViz) JSONP loader (bypasses CORS) --- */
+function gvizQuery(sheetName, tq){
+  return new Promise((resolve, reject) => {
+    if(!window.google) window.google = {};
+    if(!window.google.visualization) window.google.visualization = {};
+    if(!window.google.visualization.Query) window.google.visualization.Query = {};
+
+    const cbKey = "__gviz_cb_" + Math.random().toString(16).slice(2);
+    window[cbKey] = (resp) => {
+      cleanup();
+      resolve(resp);
+    };
+    window.google.visualization.Query.setResponse = window[cbKey];
+
+    const script = document.createElement("script");
+    const url = new URL(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`);
+    url.searchParams.set("tqx", "out:json");
+    url.searchParams.set("sheet", sheetName);
+    url.searchParams.set("tq", tq || "select *");
+    url.searchParams.set("_", String(Date.now()));
+    script.src = url.toString();
+    script.async = true;
+
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error("GViz request timed out"));
+    }, 12000);
+
+    script.onerror = () => {
+      cleanup();
+      reject(new Error("GViz request failed"));
+    };
+
+    function cleanup(){
+      clearTimeout(timer);
+      script.remove();
+      delete window[cbKey];
+    }
+
+    document.head.appendChild(script);
+  });
+}
+
+function gvizToObjects(resp){
+  const cols = (resp && resp.table && resp.table.cols ? resp.table.cols : []).map(c => c.label || c.id || "");
+  const rows = (resp && resp.table && resp.table.rows) ? resp.table.rows : [];
+  const out = [];
+  for(const r of rows){
+    const obj = {};
+    const cells = r.c || [];
+    for(let i=0;i<cols.length;i++){
+      const key = cols[i] || ("col" + i);
+      obj[key] = (cells[i] && ("v" in cells[i])) ? cells[i].v : null;
+    }
+    out.push(obj);
+  }
+  return out;
+}
+
+async function loadLiveData(){
+  try{
+    const tallyResp = await gvizQuery(TAB_TALLY, "select *");
+    const tallyObjs = gvizToObjects(tallyResp);
+
+    const newParticipants = [];
+    for(const row of tallyObjs){
+      const email = row["Email"] || row["email"] || row["Email Address"] || row["Email address"] || row["col1"];
+      const name = row["Name"] || row["name"] || row["col2"];
+      const count = Number(row["Count"] ?? row["count"] ?? row["col3"]);
+      if(!email) continue;
+      newParticipants.push({ email: String(email).trim(), name: (name ? String(name).trim() : ""), count: isFinite(count) ? count : 0 });
+    }
+
+    const respResp = await gvizQuery(TAB_RESPONSES, "select *");
+    const respObjs = gvizToObjects(respResp);
+
+    const newSubs = [];
+    for(const row of respObjs){
+      const ts = row["Timestamp"] || row["timestamp"] || row["col1"];
+      const photo = row["Photo of dog in question"] || row["Photo"] || row["photo"] || row["col2"];
+      const email = row["Email Address"] || row["Email"] || row["email"] || row["col3"];
+      const name = row["Your name (will pull from previous answers)"] || row["Your name"] || row["Name"] || row["col4"];
+      if(!ts || !email) continue;
+      newSubs.push({ ts: String(ts), photo: photo ? String(photo) : "", email: String(email).trim(), name: name ? String(name).trim() : "" });
+    }
+
+    newSubs.sort((a,b)=> parseDate(b.ts) - parseDate(a.ts));
+    SUBMISSIONS = newSubs.slice(0, LOAD_SUBMISSIONS_LIMIT);
+    PARTICIPANTS = newParticipants;
+
+    $("#lastRefresh").textContent = new Date().toLocaleString([], {month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"});
+    showToast("Fresh dawgs fetched 🧾");
+    render();
+  }catch(e){
+    console.warn("Live fetch failed:", e);
+    showToast("Live fetch failed — using last known data");
+    render();
+  }
+}
+
+/* --- core computation --- */
+function compute(scopeDays){
+  const now = new Date();
+  const cutoff = scopeDays === "all" ? null : new Date(now.getTime() - Number(scopeDays)*24*3600*1000);
+
+  const subs = (SUBMISSIONS || [])
+    .map(s => ({...s, d: parseDate(s.ts)}))
+    .filter(s => !cutoff || s.d >= cutoff)
+    .sort((a,b)=>b.d-a.d);
+
+  const lastByEmail = new Map();
+  for(const s of subs){
+    const key = s.email || "";
+    if(!key) continue;
+    if(!lastByEmail.has(key)) lastByEmail.set(key, s.d);
+  }
+
+  const rows = (PARTICIPANTS || [])
+    .map(p => ({...p, displayName: (p.name && p.name.trim()) ? p.name.trim() : (p.email || "Unknown"), lastSeen: lastByEmail.get(p.email) || null }));
+
+  rows.sort((a,b)=> (Number(b.count)||0) - (Number(a.count)||0) || (a.displayName||"").localeCompare(b.displayName||""));
+
+  const totalDogs = rows.reduce((acc,r)=>acc + (Number(r.count)||0),0);
+  const top = rows[0] || {displayName:"—", count:0, email:""};
+
+  return {rows, subs, totalDogs, top};
+}
+
+function hashSeed(str){
+  // Deterministic 32-bit hash for stable randomness per submission
+  let h = 2166136261;
+  for (let i=0;i<str.length;i++){
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+function randFromSeed(seed){
+  // Mulberry32
+  let t = seed + 0x6D2B79F5;
+  t = Math.imul(t ^ (t >>> 15), 1 | t);
+  t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+
+function pickComment(name, spicy, submissionKey, usedSet){
+  const POOL_MILD = [
+    "Spreadsheet fed. Society improved.",
+    "Bun integrity: strong. Commitment: stronger.",
+    "Condiments chose violence (in the best way).",
+    "A tasteful dog. A reckless timestamp. Perfect.",
+    "This is what leadership looks like (in a bun).",
+    "Audacious. Carby. Inspirational.",
+    "That’s a dog you introduce to your parents.",
+    "Balanced portfolio: bun, dog, chaos.",
+    "Another receipt for the Dawgocracy archives.",
+    "Clean work. No notes. Carry on.",
+    "The bun-to-dog ratio is between you and your conscience.",
+    "We’re calling this one “performance art.”",
+    "A humble flex — but still a flex.",
+    "Honestly? Efficient. Respect.",
+    "That dog looks like it had a mission statement.",
+    "Eat. Post. Repeat. You understood the assignment.",
+    "This is the kind of evidence a jury would accept.",
+    "Shoutout to the bun for showing up today.",
+    "Absolute professionalism (for a hot dog photo).",
+    "Your future self will thank you (maybe)."
+  ];
+
+  const POOL_SPICY = [
+    "Unhinged hot dog conduct. We respect the audacity.",
+    "That dog just got speedrun’d. No survivors. Iconic.",
+    "This isn’t lunch — it’s a power move with condiments.",
+    "Violent bun energy. Absolutely feral. Love that for you.",
+    "You ate like you’re trying to frighten the leaderboard. Effective.",
+    "This photo has ‘no regrets’ energy and it’s terrifying.",
+    "The bun looks innocent. The vibe does not.",
+    "If confidence were calories, this would be illegal.",
+    "That’s not a snack — that’s a warning shot.",
+    "Culinary menace behavior. In a complimentary way.",
+    "The spreadsheet is blushing. Keep going.",
+    "You didn’t eat a dog — you erased it from history.",
+    "This is what ‘competitive’ tastes like.",
+    "Somebody call the league office. This is suspiciously strong.",
+    "That’s the kind of dog that gets you audited (by friends).",
+    "The mustard is doing crimes and I support it.",
+    "You posted a dog like you were mad at the concept of mercy.",
+    "A hot dog photo so bold it should have a PR team.",
+    "This is pure ‘main character in a Costco’ energy.",
+    "Every bite sounded like a victory speech."
+  ];
+
+  const EXTRAS_MILD = [
+    `${name} is on a roll. Literally.`,
+    `${name} keeps the Dawgocracy alive.`,
+    `${name} chose joy (and sodium).`,
+    `${name} understood the assignment.`,
+    `${name} is building a legacy, one bun at a time.`,
+    `${name} is quietly farming W’s.`,
+    `${name} is making the rest of us look lazy.`,
+    `${name} came, saw, and chewed.`,
+    `${name} is keeping it honest.`,
+    `${name} is putting points on the board.`
+  ];
+
+  const EXTRAS_SPICY = [
+    `${name} chose chaos and condiments.`,
+    `${name} woke up and said “bun.”`,
+    `${name} is farming W’s and cholesterol.`,
+    `${name} is speedrunning this season.`,
+    `${name} is making it look personal.`,
+    `${name} is allergic to losing.`,
+    `${name} is doing damage (to the leaderboard).`,
+    `${name} is cooking with disrespect.`,
+    `${name} is out here collecting receipts.`,
+    `${name} is a problem (for everyone else).`
+  ];
+
+  const pool = spicy ? POOL_SPICY : POOL_MILD;
+  const extras = spicy ? EXTRAS_SPICY : EXTRAS_MILD;
+
+  const key = String(submissionKey || name || "");
+  let seed = hashSeed(key);
+  let r = randFromSeed(seed);
+  let idx = Math.floor(r * pool.length);
+
+  // Avoid duplicates in the visible feed if possible
+  if (usedSet && usedSet.has(idx)) {
+    idx = (idx + 1 + Math.floor(r * 7)) % pool.length;
+  }
+  if (usedSet) usedSet.add(idx);
+
+  let base = pool[idx];
+
+  // Deterministic chance of an extra line (about 55%)
+  r = randFromSeed(seed ^ 0x9E3779B9);
+  if (r < 0.55) {
+    const j = Math.floor(randFromSeed(seed ^ 0x85EBCA6B) * extras.length);
+    base = `${base} ${extras[j]}`;
+  }
+  return base;
+}
+
+function buildCallout(r, top, spicy){
+  const d = r.displayName;
+  const c = Number(r.count)||0;
+  const delta = (Number(top.count)||0) - c;
+
+  if(r.email === top.email){
+    return spicy
+      ? `🚨 TOP DAWG ALERT 🚨 ${d} is out here running up the hot dog numbers (${c}). Approach with respect and condiments.`
+      : `🌭 Top Dawg: ${d} leads with ${c}. Respect the bun.`;
+  }
+  if(delta <= 2 && delta >= 0){
+    return spicy
+      ? `${d} is *sniffing* the crown. Only ${delta} dawg(s) behind the top. Eat like you mean it.`
+      : `${d} is close — only ${delta} behind the top. Time to cook.`;
+  }
+  if(c <= 2){
+    return spicy
+      ? `${d}, blink twice if you’ve forgotten what a hot dog is. (${c} total.) Fix that. 🌭`
+      : `${d}, we miss your dawgs. (${c} total.) Post one soon.`;
+  }
+  return spicy
+    ? `${d} has ${c} on the board. That’s decent… but the top Dawg has ${top.count}. Close the gap or accept your bun fate.`
+    : `${d} has ${c}. Top is ${top.count}. Plenty of runway — go get it.`;
+}
+
+function escapeHtml(s){
+  return String(s ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+/* --- Cheesy quote of the day --- */
+function dailySeed(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+function seededRand(seedStr){
+  let h = 2166136261;
+  for(let i=0;i<seedStr.length;i++){
+    h ^= seedStr.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return function(){
+    h += 0x6D2B79F5;
+    let t = Math.imul(h ^ (h >>> 15), 1 | h);
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function buildDailyQuote(rows, subs){
+  const seed = dailySeed();
+  const r = seededRand(seed);
+  const pick = (arr)=> arr[Math.floor(r()*arr.length)];
+  const spicy = spicyOn();
+
+  const top = rows[0];
+  const bottom = rows.slice().filter(x => (x.displayName||"").toLowerCase() !== "unknown")
+    .sort((a,b)=>(Number(a.count)||0)-(Number(b.count)||0))[0];
+  const recent = subs[0];
+
+  const templatesMild = [
+    `🌭 Dawg Quote of the Day: “A hot dog posted is a hot dog that *counts*.” Today’s energy: ${top?.displayName || "someone"} is flexing with ${top?.count || 0}, while ${bottom?.displayName || "someone"} is warming up the bench at ${bottom?.count || 0}.`,
+    `🌭 “It’s not a phase — it’s a lifestyle.” Shoutout to ${recent?.name || "the latest legend"} for feeding the spreadsheet. Everyone else: stop lurking, start lurching toward a bun.`,
+    `🌭 “Quarterly updates are coming.” Consider this your friendly reminder that the bun remembers. Current pace-setter: ${top?.displayName || "—"}.`,
+    `🌭 “Dog + carb = destiny.” If you’re at ${bottom?.count || 0}… you’re not behind, you’re just building suspense.`,
+    `🌭 “Respect the bun. Fear the tally.” Today’s goal: one (1) dog, one (1) photo, zero (0) excuses.`
+  ];
+  const templatesSpicy = [
+    `🌭 Dawg Quote of the Day: “The spreadsheet is eternal, and it has receipts.” ${top?.displayName || "Someone"} is leading with ${top?.count || 0}. ${bottom?.displayName || "Someone"} is out here doing interpretive hunger at ${bottom?.count || 0}.`,
+    `🌭 “Post the dog. Respectfully.” ${recent?.name || "Latest submitter"} dropped a receipt and now the rest of you look suspiciously bun-less.`,
+    `🌭 “Eat now, negotiate later.” If you’re sitting at ${bottom?.count || 0}, that’s not “low”—that’s “concerning.”`,
+    `🌭 “Mustard is a mindset.” Today’s vibe: the top Dawg is speedrunning the year and leaving crumbs.`,
+    `🌭 “If it’s not photographed, it didn’t happen.” The Dawgocracy demands evidence — no alibis.`
+  ];
+  const photoJabsMild = [
+    "Also: that photo angle? Cinematic. Questionable. Iconic.",
+    "That lighting had *confidence*. We respect it.",
+    "That dog looks like it was assembled with purpose and a little chaos.",
+    "The bun-to-dog ratio is between you and your conscience."
+  ];
+  const photoJabsSpicy = [
+    "That photo angle is doing crimes and getting away with it.",
+    "The lighting said “no witness protection.” Bold.",
+    "That dog looks like it was built in a lab funded by vibes.",
+    "Bun-to-dog ratio: classified. (We still counted it.)"
+  ];
+
+  const base = spicy ? pick(templatesSpicy) : pick(templatesMild);
+  const jab = spicy ? pick(photoJabsSpicy) : pick(photoJabsMild);
+  return `${base} ${jab}`;
+}
+
+/* --- render --- */
+function render(){
+  const scope = $("#scope").value;
+  const q = ($("#q").value || "").trim().toLowerCase();
+  const {rows, subs, totalDogs, top} = compute(scope);
+
+  $("#dailyQuote").textContent = buildDailyQuote(rows, subs);
+
+  animateInt($("#totalDogs"), totalDogs);
+  $("#topDawg").textContent = `${top.displayName} (${top.count})`;
+
+  const start = new Date("2026-01-01T00:00:00");
+  const end = new Date("2026-12-31T23:59:59");
+  const now = new Date();
+  const totalSeasonDays = Math.max(1, Math.ceil((end - start) / (24*3600*1000)));
+
+  // Inclusive countdown: if today is within the season, show at least 1 day left on Dec 31.
+  let daysLeft = 0;
+  if (now <= end) {
+    daysLeft = Math.floor((end - now) / (24*3600*1000)) + 1;
+  }
+  animateInt($("#daysLeft"), daysLeft);
+  $("#refreshIntervalLabel").textContent = String(AUTO_REFRESH_MIN);
+
+  // Cute meters
+  $("#spark1").style.width = Math.min(100, 20 + (totalDogs % 80)) + "%";
+  $("#spark2").style.width = Math.min(100, 25 + ((Number(top.count)||0) * 3)) + "%";
+  // Days-left meter = how much season remains (inclusive)
+  $("#spark3").style.width = Math.max(2, Math.round((daysLeft / totalSeasonDays) * 100)) + "%";
+$("#asof").textContent = `Live from Google Sheets • Scope: ${scope === "all" ? "All time" : `last ${scope} days`} • Tabs: "${TAB_TALLY}", "${TAB_RESPONSES}"`;
+
+  const filtered = rows.filter(r => {
+    const a = (r.displayName||"").toLowerCase();
+    const b = (r.email||"").toLowerCase();
+    return !q || a.includes(q) || b.includes(q);
+  });
+
+  const max = rows.length ? (Number(rows[0].count)||1) : 1;
+  const tbody = $("#tbody");
+  tbody.innerHTML = "";
+
+  filtered.forEach((r, idx) => {
+    const tr = document.createElement("tr");
+    const rank = idx + 1;
+
+    const firstPhoto = (subs.find(s=>s.email===r.email)?.photo)||"";
+    const id = driveIdFromUrl(firstPhoto);
+    const ava = id ? `<img src="${driveThumb(firstPhoto)}" alt="" loading="lazy">` : initials(r.displayName);
+
+    const last = (r.lastSeen && !isNaN(r.lastSeen.getTime())) ? r.lastSeen.toLocaleString([], {month:"short", day:"2-digit"}) : "—";
+    const pct = max ? Math.max(2, Math.round(((Number(r.count)||0) / max) * 100)) : 0;
+
+    tr.innerHTML = `
+      <td class="rank">#${rank}</td>
+      <td>
+        <div class="namecell">
+          <div class="avatar">${ava}</div>
+          <div class="name">
+            <b>${escapeHtml(r.displayName)}</b>
+            <span>${escapeHtml(r.email)}</span>
+          </div>
+        </div>
+      </td>
+      <td class="count">${Number(r.count)||0}</td>
+      <td>
+        <div class="bar" title="${pct}% of top Dawg">
+          <span style="width:${pct}%"></span>
+        </div>
+      </td>
+      <td><span class="chip">🕵️ <strong>${last}</strong></span></td>
+    `;
+
+    tr.addEventListener("click", () => {
+      const msg = buildCallout(r, top, spicyOn());
+      copyText(msg);
+    });
+
+    tbody.appendChild(tr);
+  });
+
+  const feed = $("#feed");
+  feed.innerHTML = "";
+  const useSubs = subs.slice(0, FEED_LIMIT);
+
+  const usedComments = new Set();
+
+  $("#latestCount").textContent = useSubs.length;
+
+  useSubs.forEach((s) => {
+    const name = (s.name && s.name.trim()) ? s.name.trim() : (rows.find(p=>p.email===s.email)?.displayName || s.email || "Unknown");
+    const thumb = s.photo ? driveThumb(s.photo) : null;
+    const comment = pickComment(name, spicyOn(), `${s.email}|${s.ts}|${s.photo}`, usedComments);
+
+    const div = document.createElement("div");
+    div.className = "post";
+    div.innerHTML = `
+      <div class="thumb">${thumb ? `<img src="${thumb}" alt="Hot dog submission photo" loading="lazy">` : ""}</div>
+      <div>
+        <div class="meta">
+          <div>
+            <b>${escapeHtml(name)}</b>
+            <div class="t">${fmtDate(s.ts)} • <span class="chip">+1 dawg</span></div>
+          </div>
+          <div style="text-align:right">
+            ${s.photo ? `<a href="${s.photo}" target="_blank" rel="noreferrer">Open</a>` : ""}
+          </div>
+        </div>
+        <p>${escapeHtml(comment)}</p>
+      </div>
+    `;
+    feed.appendChild(div);
+  });
+
+  const shame = rows
+    .filter(r => (r.displayName||"").toLowerCase() !== "unknown")
+    .slice()
+    .sort((a,b)=>(Number(a.count)||0)-(Number(b.count)||0))
+    .slice(0, Math.min(6, rows.length));
+
+  const shameList = $("#shameList");
+  shameList.innerHTML = "";
+  shame.forEach(r => {
+    const c = Number(r.count)||0;
+    const li = document.createElement("li");
+    li.innerHTML = `<b>${escapeHtml(r.displayName)}</b> — ${c} dawg${c===1?"":"s"}`;
+    shameList.appendChild(li);
+  });
+
+  const heckles = $("#heckles");
+  heckles.innerHTML = "";
+  const pool = spicyOn() ? HECKLES_SPICY : HECKLES_MILD;
+  pool.slice(0,5).forEach(h => {
+    const li = document.createElement("li");
+    li.textContent = h;
+    heckles.appendChild(li);
+  });
+}
+
+/* --- events --- */
+$("#scope").addEventListener("change", render);
+$("#q").addEventListener("input", render);
+$("#spicy").addEventListener("change", () => {
+  render();
+  showToast(spicyOn() ? "Spicy Mode: ON 🌶️" : "Spicy Mode: OFF");
+});
+$("#celebrate").addEventListener("click", () => {
+  confettiBurst();
+  const {top} = compute($("#scope").value);
+  showToast(`All hail ${top.displayName} 🏆`);
+});
+$("#refreshNow").addEventListener("click", () => {
+  loadLiveData();
+});
+
+document.addEventListener("keydown", (e) => {
+  if(e.key === "/"){
+    e.preventDefault();
+    $("#q").focus();
+  }
+  if(e.key === "Escape"){
+    $("#q").value = "";
+    $("#q").blur();
+    render();
+  }
+});
+
+/* --- boot --- */
+render();
+showToast("Spicy Mode: ON 🌶️");
+loadLiveData();
+setInterval(loadLiveData, AUTO_REFRESH_MIN * 60 * 1000);
+</script>
+</body>
+
+</html>
