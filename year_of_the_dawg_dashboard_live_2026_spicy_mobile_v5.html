@@ -265,7 +265,7 @@
       border-collapse:separate;
       border-spacing:0;
       font-size:13px;
-      min-width: 760px;
+      min-width: 680px;
     }
     thead th{
       text-align:left;
@@ -453,6 +453,121 @@
     @keyframes fall{
       to{ transform: translateY(110vh) rotate(520deg); opacity:1; }
     }
+  
+    
+    /* Intro animation: flying dawg gets eaten */
+    .intro-scene{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 120;
+      opacity: 1;
+    }
+    .intro-scene.done{
+      opacity: 0;
+      transition: opacity .25s ease-out;
+    }
+    .intro-caption{
+      position:absolute;
+      left: 14px;
+      top: 84px;
+      font-weight: 900;
+      font-size: 14px;
+      letter-spacing: .2px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(17,19,26,.80);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow);
+      transform: translateY(-8px);
+      opacity: 0;
+      animation: introCaptionIn .35s ease-out forwards .15s;
+    }
+    @keyframes introCaptionIn{
+      to{ transform: translateY(0); opacity: 1; }
+    }
+    .intro-human{
+      position:absolute;
+      right: 10px;
+      top: 110px;
+      font-size: 64px;
+      transform: translateX(120px);
+      opacity: 0;
+      filter: drop-shadow(0 12px 30px rgba(0,0,0,.45));
+      animation: humanIn .45s ease-out forwards .25s;
+    }
+    .intro-fork{
+      position:absolute;
+      right: 78px;
+      top: 160px;
+      font-size: 40px;
+      transform: translateX(160px) rotate(-20deg);
+      opacity: 0;
+      animation: forkIn .55s ease-out forwards .28s;
+      filter: drop-shadow(0 12px 30px rgba(0,0,0,.45));
+    }
+    @keyframes humanIn{ to{ transform: translateX(0); opacity: 1; } }
+    @keyframes forkIn{ to{ transform: translateX(0) rotate(10deg); opacity: 1; } }
+
+    .intro-dawg{
+      position:absolute;
+      left: -80px;
+      top: 140px;
+      font-size: 54px;
+      filter: drop-shadow(0 14px 34px rgba(0,0,0,.55));
+      animation: dawgFly 1.9s cubic-bezier(.2,.9,.2,1) forwards .15s;
+    }
+    .intro-dawg::after{
+      content:"";
+      position:absolute;
+      left:-80px;
+      top: 50%;
+      width: 90px;
+      height: 12px;
+      transform: translateY(-50%);
+      background: linear-gradient(90deg, rgba(243,193,26,.0), rgba(243,193,26,.35), rgba(209,42,42,.25), rgba(74,214,109,.22), rgba(124,255,203,.0));
+      border-radius: 999px;
+      filter: blur(1px);
+      opacity: .9;
+    }
+    @keyframes dawgFly{
+      0%{ transform: translateX(-10vw) rotate(-12deg) scale(1); }
+      65%{ transform: translateX(calc(74vw)) rotate(8deg) scale(1.05); }
+      78%{ transform: translateX(calc(80vw)) rotate(2deg) scale(1.02); }
+      100%{ transform: translateX(calc(84vw)) rotate(0deg) scale(.15); opacity: 0; }
+    }
+
+    @media (max-width: 520px){
+      .intro-caption{ top: 72px; }
+      .intro-human{ top: 96px; font-size: 56px; }
+      .intro-fork{ top: 142px; font-size: 36px; right: 70px; }
+      .intro-dawg{ top: 120px; font-size: 48px; }
+    }
+
+    /* Compact leaderboard table on phones (aim: no horizontal scroll for most) */
+    @media (max-width: 520px){
+      .table-wrap{ margin-top: 8px; }
+      table{ min-width: 0; font-size: 12px; }
+      thead th{ padding: 8px 8px; font-size:10px; }
+      tbody td{ padding: 10px 8px; }
+
+      .rank{ width: 42px; font-size:11px; }
+      .namecell{ min-width: 170px; gap:8px; }
+      .avatar{ width:28px; height:28px; border-radius:10px; }
+      .name b{ font-size:12px; }
+      .name span{
+        max-width: 140px;
+        overflow:hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display:block;
+      }
+
+      .count{ font-size:13px; }
+      .bar{ min-width: 92px; height:8px; }
+      .chip{ font-size:10px; padding:4px 6px; }
+    }
+
   </style>
 </head>
 
@@ -591,6 +706,14 @@
     </div>
   </main>
 
+
+  <div class="intro-scene" id="introScene" aria-hidden="true">
+    <div class="intro-caption">A wild dawg appears… (oh no)</div>
+    <div class="intro-human">😋</div>
+    <div class="intro-fork">🍴</div>
+    <div class="intro-dawg">🌭</div>
+  </div>
+
   <div class="confetti" id="confetti"></div>
   <div class="toast" id="toast"></div>
 
@@ -638,7 +761,22 @@ const HECKLES_MILD = [
   "One dog today = one less personality trait tomorrow. Choose wisely.",
   "Post a dog. Feed the spreadsheet. Obey the Dawgocracy.",
   "You don’t need motivation — you need mustard.",
-  "This leaderboard won’t fix your problems, but it will expose them."
+  "This leaderboard won’t fix your problems, but it will expose them.",
+  "Consider this your gentle nudge toward a bun.",
+  "The tally is hungry. So should you be.",
+  "If you’re reading this, you have time to eat a dog.",
+  "A hot dog is cheaper than therapy. Allegedly.",
+  "Your future self wants the points.",
+  "No shame, just… mild concern.",
+  "Friendly reminder: the bun remembers.",
+  "Do it for the spreadsheet. It’s doing its best.",
+  "One photo = one less excuse.",
+  "We believe in you (barely).",
+  "Momentum starts with one dog.",
+  "Today’s forecast: 90% chance of mustard.",
+  "If you can scroll this, you can chew.",
+  "Buns before grudges.",
+  "Be the person your tally thinks you are."
 ];
 
 const HECKLES_SPICY = [
@@ -646,7 +784,22 @@ const HECKLES_SPICY = [
   "At this point the bun has more ambition than you do.",
   "If you don’t post a dog soon, we’re filing you under ‘mythical creature.’",
   "Your count is low enough to be a rumor. Make it real.",
-  "Stop spectating. Start chewing. The spreadsheet wants blood (ketchup)."
+  "Stop spectating. Start chewing. The spreadsheet wants blood (ketchup).",
+  "Your tally is embarrassing in a very fixable way.",
+  "The leaderboard called. It asked if you’re okay.",
+  "You’re acting like hot dogs are a conspiracy. Eat one.",
+  "Right now you’re losing to people with mustard on their sleeves.",
+  "You’re not behind. You’re just… aggressively not trying.",
+  "We can’t respect your excuses and your bunlessness at the same time.",
+  "Post one dog. Minimum. Then talk.",
+  "Your points are giving ‘AFK’.",
+  "If you’re last, at least be last with pride (and ketchup).",
+  "This is a competition, not a silent retreat.",
+  "Your hunger is fictional. Prove it isn’t.",
+  "We’ve seen plants with more drive.",
+  "The spreadsheet is disappointed but still hopeful. Barely.",
+  "No dog? No peace.",
+  "Stop being a background character in your own bun story."
 ];
 
 /* =========================
@@ -792,6 +945,9 @@ function randFromSeed(seed){
 }
 
 function pickComment(name, spicy, submissionKey, usedSet){
+  // Rotate commentary daily so the feed doesn't get stale over the year.
+  const day = dailySeed();
+
   const POOL_MILD = [
     "Spreadsheet fed. Society improved.",
     "Bun integrity: strong. Commitment: stronger.",
@@ -812,7 +968,47 @@ function pickComment(name, spicy, submissionKey, usedSet){
     "Shoutout to the bun for showing up today.",
     "Absolute professionalism (for a hot dog photo).",
     "Your future self will thank you (maybe).",
-    "Pure “I had things to prove” energy."
+    "Pure “I had things to prove” energy.",
+    "We are witnessing bun-based excellence.",
+    "The dog looks innocent. The intentions do not.",
+    "This is quality documentation. A+ compliance.",
+    "That’s a clean +1. Efficient, ruthless, beautiful.",
+    "A dog so confident it could host a podcast.",
+    "The bun clocked in. The dog clocked out.",
+    "This is what ‘showing up’ looks like.",
+    "A tasteful amount of chaos. Respect.",
+    "This dog has ‘team player’ energy.",
+    "It’s giving: steady progress, elite focus.",
+    "Not a meal. A lifestyle update.",
+    "You understood the social contract: photo or it didn’t happen.",
+    "High effort bun work. The people notice.",
+    "This is a public service announcement in edible form.",
+    "The spreadsheet is purring.",
+    "No notes. Only applause. And mustard.",
+    "This dog has big ‘promotion packet’ vibes.",
+    "The angles? The confidence? The receipts? Perfect.",
+    "A glorious little crime of convenience.",
+    "The bun-to-dog ratio is between you and your conscience.",
+    "We love a consistent contributor.",
+    "This is a healthy relationship with documentation.",
+    "The dog looks like it was assembled with purpose.",
+    "This is what victory smells like (a little).",
+    "A calm, steady climb. We see it.",
+    "Absolute bun discipline. Rare trait.",
+    "The condiments are tasteful. The ambition is not subtle.",
+    "Iconic. Appropriate. Spreadsheet-worthy.",
+    "This is the kind of evidence historians will study.",
+    "You posted like a professional. Disturbing. Admirable.",
+    "A dog that says “I have my life together.”",
+    "Sensible. Efficient. Deliciously recorded.",
+    "A well-documented win.",
+    "That’s a dog with good posture.",
+    "A dog that makes other dogs feel insecure.",
+    "The bun did not come to play.",
+    "The dog is humble. The result is not.",
+    "Clean craftsmanship. Zero drama. Perfect.",
+    "This is how you build a legacy: one bun at a time.",
+    "We accept this offering."
   ];
 
   const POOL_SPICY = [
@@ -835,7 +1031,46 @@ function pickComment(name, spicy, submissionKey, usedSet){
     "You posted like you were mad at mercy.",
     "A hot dog photo so bold it needs a PR team.",
     "Main character at the food court. I see you.",
-    "Every bite sounded like a victory speech."
+    "Every bite sounded like a victory speech.",
+    "This is borderline heroic (and slightly alarming).",
+    "That dog didn’t stand a chance. Neither will your opponents.",
+    "You’re not eating — you’re making a statement.",
+    "This is the energy that ruins group chats (in a good way).",
+    "The bun is scared. The leaderboard is shaking.",
+    "That’s not documentation — that’s intimidation.",
+    "The dog was deleted. The receipt remains.",
+    "You’re feeding the spreadsheet like it owes you money.",
+    "This is what ‘pressure’ looks like.",
+    "You’re not competing. You’re threatening.",
+    "Absolute menace behavior. Compliment. Again.",
+    "This dog got treated like an inbox at 4:59pm.",
+    "You are doing damage. Respectfully.",
+    "That’s a ‘do not invite me to brunch’ photo.",
+    "You posted a dog like you had beef with carbs.",
+    "The condiments are loud. You are louder.",
+    "That bun is a hostage situation.",
+    "This is bun-based domination.",
+    "A dog so aggressive it should come with a warning label.",
+    "You’re speedrunning the year and it shows.",
+    "This is why other people feel unsafe (hungry).",
+    "This looks like it was eaten with intent.",
+    "If the leaderboard had emotions, it would be crying.",
+    "You’re not here to participate. You’re here to conquer.",
+    "This is how legends get created (and arteries get tested).",
+    "The photo screams “I’m not sorry.” Incredible.",
+    "The bun said “please.” You said “no.”",
+    "This is what ‘competitive spirit’ looks like in HD.",
+    "You’re cooking with disrespect.",
+    "The dog was an innocent bystander.",
+    "This is a hostile takeover of lunchtime.",
+    "You posted that like it’s evidence in court. Dangerous.",
+    "The spreadsheet is begging for mercy.",
+    "That’s a “watch me” dog.",
+    "This is pure leaderboard violence (ketchup edition).",
+    "You are a problem. For everyone else.",
+    "That’s not a dog — that’s a declaration.",
+    "Bun confidence at historic highs.",
+    "This is why they invented tallies."
   ];
 
   const EXTRAS_MILD = [
@@ -848,7 +1083,13 @@ function pickComment(name, spicy, submissionKey, usedSet){
     `${name} is making the rest of us look lazy.`,
     `${name} came, saw, and chewed.`,
     `${name} is keeping it honest.`,
-    `${name} is putting points on the board.`
+    `${name} is putting points on the board.`,
+    `${name} is practicing consistency like a pro.`,
+    `${name} is making ‘steady’ look scary.`,
+    `${name} is bringing disciplined bun energy.`,
+    `${name} is doing the right thing (for the spreadsheet).`,
+    `${name} is setting an example (unfortunately).`,
+    `${name} is adding lore to this competition.`
   ];
 
   const EXTRAS_SPICY = [
@@ -861,28 +1102,48 @@ function pickComment(name, spicy, submissionKey, usedSet){
     `${name} is doing damage (to the leaderboard).`,
     `${name} is cooking with disrespect.`,
     `${name} is out here collecting receipts.`,
-    `${name} is a problem (for everyone else).`
+    `${name} is a problem (for everyone else).`,
+    `${name} is turning lunch into a spectacle.`,
+    `${name} is bullying the standings.`,
+    `${name} is running up the score.`,
+    `${name} is making the rest of you nervous.`,
+    `${name} is choosing violence (mustard).`,
+    `${name} is behaving like a final boss.`
   ];
 
   const pool = spicy ? POOL_SPICY : POOL_MILD;
   const extras = spicy ? EXTRAS_SPICY : EXTRAS_MILD;
 
   const key = String(submissionKey || name || "");
-  const seed = hashSeed(key);
+  // Include day + spicy toggle so the same submission gets new lines over time.
+  const seed = hashSeed(key + "|" + day + "|" + (spicy ? "S" : "M"));
   let r = randFromSeed(seed);
   let idx = Math.floor(r * pool.length);
 
   if (usedSet && usedSet.has(idx)) {
-    idx = (idx + 1 + Math.floor(r * 7)) % pool.length;
+    // bump deterministically to avoid duplicates in the visible feed
+    idx = (idx + 1 + Math.floor(r * 11)) % pool.length;
   }
   if (usedSet) usedSet.add(idx);
 
   let base = pool[idx];
+
+  // 65% chance of an extra line
   r = randFromSeed(seed ^ 0x9E3779B9);
-  if (r < 0.55) {
+  if (r < 0.65) {
     const j = Math.floor(randFromSeed(seed ^ 0x85EBCA6B) * extras.length);
     base = `${base} ${extras[j]}`;
   }
+
+  // 18% chance of a quick kicker line
+  r = randFromSeed(seed ^ 0xC2B2AE35);
+  if (r < 0.18) {
+    const kickers = spicy
+      ? ["No witnesses. Only buns.", "The spreadsheet saw everything.", "This is why we can’t have nice diets.", "Another one. Again. Relentless."]
+      : ["Strong showing.", "Good form.", "Certified.", "We accept this offering."];
+    base = `${base} ${kickers[Math.floor(randFromSeed(seed ^ 0x27D4EB2F) * kickers.length)]}`;
+  }
+
   return base;
 }
 
@@ -1242,9 +1503,15 @@ function render(){
   const heckles = $("#heckles");
   heckles.innerHTML = "";
   const pool = spicyOn() ? HECKLES_SPICY : HECKLES_MILD;
-  pool.slice(0,5).forEach(h => {
+  // Pick 5 heckles deterministically per day so it feels fresh without flickering each render.
+  const r = seededRandFromString(dailySeed() + (spicyOn() ? "|hs" : "|hm"));
+  const idxs = new Set();
+  while(idxs.size < Math.min(5, pool.length)){
+    idxs.add(Math.floor(r() * pool.length));
+  }
+  Array.from(idxs).forEach(i => {
     const li = document.createElement("li");
-    li.textContent = h;
+    li.textContent = pool[i];
     heckles.appendChild(li);
   });
 }
@@ -1288,6 +1555,16 @@ document.addEventListener("keydown", (e) => {
 ========================= */
 render();
 showToast("Spicy Mode: ON 🌶️");
+
+// Intro animation: fly a dawg into a hungry human, then remove.
+(function(){
+  const scene = document.getElementById("introScene");
+  if(!scene) return;
+  // Let it play, then fade out + remove
+  setTimeout(() => scene.classList.add("done"), 2350);
+  setTimeout(() => scene.remove(), 2700);
+})();
+
 loadLiveData();
 setInterval(loadLiveData, AUTO_REFRESH_MIN * 60 * 1000);
 </script>
