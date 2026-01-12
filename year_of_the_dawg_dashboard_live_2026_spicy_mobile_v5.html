@@ -265,7 +265,7 @@
       border-collapse:separate;
       border-spacing:0;
       font-size:13px;
-      min-width: 680px;
+      min-width: 640px;
     }
     thead th{
       text-align:left;
@@ -310,6 +310,7 @@
     .name span:empty{ display:none; }
 
     .count{ font-weight:900; font-size:14px; }
+    .avg{ font-weight:900; font-size:12px; color: var(--neon); }
     .bar{
       height:10px;
       border-radius:999px;
@@ -378,6 +379,70 @@
     .meta b{ font-size:13px; }
     .meta .t{ font-size:11px; color:var(--muted); }
     .post p{ margin:6px 0 0 0; font-size:12.5px; line-height:1.3; }
+
+    
+    /* Voting UI */
+    .vote-row{
+      margin-top: 10px;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .vote-btn{
+      cursor:pointer;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-weight: 900;
+      letter-spacing: .2px;
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+    }
+    .vote-btn:hover{ background: rgba(255,255,255,.06); }
+    .vote-btn.up.active{
+      background: linear-gradient(180deg, rgba(74,214,109,.35), rgba(74,214,109,.12));
+      border-color: rgba(74,214,109,.35);
+    }
+    .vote-btn.down.active{
+      background: linear-gradient(180deg, rgba(209,42,42,.35), rgba(209,42,42,.12));
+      border-color: rgba(209,42,42,.35);
+    }
+    .vote-score{
+      font-weight: 900;
+      color: var(--mustard);
+    }
+    .sentinel{
+      text-align:center;
+      color: var(--muted);
+      font-size:12px;
+      padding: 10px 0 0 0;
+    }
+    .sentinel.hidden{ display:none; }
+
+    .mini{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.2;
+    }
+    .mini b{ color: var(--text); }
+    .mini .mini-thumb{
+      width:44px; height:44px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      overflow:hidden;
+      flex: 0 0 auto;
+    }
+    .mini .mini-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .mini .mini-meta .t{ font-size:11px; color: var(--muted); margin-top:2px; }
+
 
     /* Shame board */
     .shame{
@@ -584,6 +649,31 @@
     /* Compact leaderboard table on phones (aim: no horizontal scroll for most) */
     @media (max-width: 520px){
       .table-wrap{ margin-top: 8px; }
+      table{
+        min-width: 0;
+        font-size: 12px;
+        table-layout: fixed;
+      }
+      thead th{ padding: 7px 6px; font-size:10px; }
+      tbody td{ padding: 9px 6px; }
+
+      thead th:nth-child(1){ width: 42px; }  /* Rank */
+      thead th:nth-child(3){ width: 48px; }  /* Count */
+      thead th:nth-child(4){ width: 60px; }  /* Avg/day */
+      thead th:nth-child(5){ width: 74px; }  /* Heat */
+      thead th:nth-child(6){ width: 76px; }  /* Last Seen */
+
+      .rank{ width: 42px; font-size:11px; }
+      .namecell{ min-width: 0; gap:6px; }
+      .avatar{ width:26px; height:26px; border-radius:10px; }
+      .name b{ font-size:12px; }
+      .name span:empty{ display:none; }
+
+      .count{ font-size:13px; }
+      .avg{ font-size:11px; }
+      .bar{ min-width: 0; width: 74px; height:8px; }
+      .chip{ font-size:10px; padding:4px 6px; }
+    }
       table{ min-width: 0; font-size: 12px; }
       thead th{ padding: 8px 8px; font-size:10px; }
       tbody td{ padding: 10px 8px; }
@@ -693,6 +783,7 @@
                   <th>Rank</th>
                   <th>Dawg</th>
                   <th>Count</th>
+                  <th>Avg/day</th>
                   <th>Heat</th>
                   <th>Last Seen</th>
                 </tr>
@@ -713,7 +804,33 @@
           <div class="hint"><span class="chip">🔥 <strong id="latestCount">—</strong> recent posts</span></div>
         </div>
         <div class="card-body">
+          <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
+            <div class="pill">
+              <label for="feedSort">Feed</label>
+              <select id="feedSort" title="How to order the photo feed">
+                <option value="new" selected>Newest</option>
+                <option value="best">Best (👍)</option>
+                <option value="worst">Worst (👎)</option>
+              </select>
+            </div>
+            <span class="chip">🗳️ <strong id="voteMode">Votes: local</strong></span>
+            <span class="chip">📷 <strong id="feedShown">0</strong>/<strong id="feedTotal">0</strong></span>
+          </div>
+
+          <div class="two-cols" id="voteLeaders" style="margin-bottom:12px;">
+            <div class="stat">
+              <div class="k">Best Dawg (by votes)</div>
+              <div id="bestDawg" class="mini">Vote to crown a champion.</div>
+            </div>
+            <div class="stat">
+              <div class="k">Worst Dawg (by votes)</div>
+              <div id="worstDawg" class="mini">Vote to crown a villain.</div>
+            </div>
+          </div>
+
           <div class="feed" id="feed"></div>
+          <div id="feedSentinel" class="sentinel">Loading more dawgs…</div>
+
 
           <div class="card shame">
             <div class="card-body">
@@ -761,9 +878,10 @@
 const SHEET_ID = "17Y2SosZ5wmAjsB1FUyr2AOy3r7-PjMdOC1Mfhkur4ws";
 const TAB_TALLY = "Active Tally";
 const TAB_RESPONSES = "Form Responses";
+const TAB_VOTES = "Votes"; // optional: add a Votes tab to the sheet for shared voting
 const AUTO_REFRESH_MIN = 5;
 const FEED_LIMIT = 10;
-const LOAD_SUBMISSIONS_LIMIT = 400;
+const LOAD_SUBMISSIONS_LIMIT = 10000;
 
 /* =========================
    FALLBACK DATA
@@ -789,6 +907,30 @@ let PARTICIPANTS = [
 ];
 
 let SUBMISSIONS = []; // will be loaded live
+
+// Votes: submissionId -> {up, down}. Loaded from optional TAB_VOTES.
+// If TAB_VOTES doesn't exist, we still allow local voting on-device.
+let VOTE_TALLY = new Map();
+
+// Local user vote: submissionId -> -1/0/1
+let LOCAL_VOTES = (() => {
+  try { return JSON.parse(localStorage.getItem("yotd_votes_v1") || "{}"); }
+  catch(e){ return {}; }
+})();
+
+function saveLocalVotes(){
+  try{ localStorage.setItem("yotd_votes_v1", JSON.stringify(LOCAL_VOTES)); }catch(e){}
+}
+
+// Infinite feed state
+const FEED_PAGE_SIZE = 24;
+let FEED_STATE = {
+  key: "",
+  cursor: 0,
+  list: [],
+  usedComments: new Set()
+};
+
 
 /* =========================
    STRINGS
@@ -871,6 +1013,19 @@ function driveThumb(url){
   const id = driveIdFromUrl(url);
   if(!id) return null;
   return `https://drive.google.com/thumbnail?id=${id}&sz=w400-h400`;
+}
+
+
+function submissionId(sub){
+  // Prefer Drive file id if present so it's stable across viewers.
+  return driveIdFromUrl(sub.photo) || (`ts:${sub.ts}|${sub.name||""}`);
+}
+function getVoteCounts(id){
+  const v = VOTE_TALLY.get(id) || {up:0, down:0};
+  return {up: (v.up|0), down: (v.down|0), score: ((v.up|0) - (v.down|0))};
+}
+function setVoteCounts(id, up, down){
+  VOTE_TALLY.set(id, {up: Math.max(0, up|0), down: Math.max(0, down|0)});
 }
 
 function initials(nameOrEmail){
@@ -1255,19 +1410,15 @@ function buildDailyQuote(rows, subs){
 /* =========================
    CALL OUTS
 ========================= */
-function buildCallout(r, topCount, topTies, spicy){
+function buildCallout(r, top, spicy){
   const d = r.displayName;
   const c = Number(r.count)||0;
-  const delta = (Number(topCount)||0) - c;
+  const delta = (Number(top.count)||0) - c;
 
-  if((Number(topCount)||0) === c){
+  if(r.email === top.email){
     return spicy
-      ? (topTies && topTies.length > 1
-          ? `🚨 TOP DAWG TIE 🚨 ${d} is leading (${c}). Shared crown. Shared shame for everyone else.`
-          : `🚨 TOP DAWG 🚨 ${d} is eating like they hate peace (${c}). Bow to the bun.`)
-      : (topTies && topTies.length > 1
-          ? `🌭 Top Dawg (Tie): ${d} leads with ${c}.`
-          : `🌭 Top Dawg: ${d} leads with ${c}. Respect the bun.`);
+      ? `🚨 TOP DAWG 🚨 ${d} is eating like they hate peace (${c}). Bow to the bun.`
+      : `🌭 Top Dawg: ${d} leads with ${c}. Respect the bun.`;
   }
   if(delta <= 2 && delta >= 0){
     return spicy
@@ -1280,8 +1431,8 @@ function buildCallout(r, topCount, topTies, spicy){
       : `${d}, we miss your dawgs. (${c} total.) Post one soon.`;
   }
   return spicy
-    ? `${d} has ${c} on the board. That’s fine… but the top Dawg has ${topCount}. Choose violence (mustard).`
-    : `${d} has ${c}. Top is ${topCount}. Plenty of runway — go get it.`;
+    ? `${d} has ${c} on the board. That’s fine… but the top Dawg has ${top.count}. Choose violence (mustard).`
+    : `${d} has ${c}. Top is ${top.count}. Plenty of runway — go get it.`;
 }
 
 /* =========================
@@ -1382,7 +1533,36 @@ async function loadLiveData(){
     SUBMISSIONS = newSubs.slice(0, LOAD_SUBMISSIONS_LIMIT);
     PARTICIPANTS = newParticipants;
 
-    $("#lastRefresh").textContent = new Date().toLocaleString([], {month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"});
+    // Optional: load shared votes from a "Votes" tab (columns can vary).
+    try{
+      const votesResp = await gvizQuery(TAB_VOTES, "select *");
+      const voteObjs = gvizToObjects(votesResp);
+      const tally = new Map();
+      for(const row of voteObjs){
+        const id = row["Submission ID"] || row["SubmissionID"] || row["ID"] || row["Id"] || row["id"] || row["col1"];
+        const vRaw = row["Vote"] || row["vote"] || row["Direction"] || row["Up/Down"] || row["col2"];
+        if(!id || vRaw == null) continue;
+
+        const s = String(vRaw).toLowerCase();
+        let dir = 0;
+        if(typeof vRaw === "number") dir = vRaw > 0 ? 1 : (vRaw < 0 ? -1 : 0);
+        else if(s.includes("up") || s.includes("👍") || s.includes("1")) dir = 1;
+        else if(s.includes("down") || s.includes("👎") || s.includes("-1")) dir = -1;
+
+        if(dir === 0) continue;
+        const key = String(id).trim();
+        const cur = tally.get(key) || {up:0, down:0};
+        if(dir === 1) cur.up++;
+        else cur.down++;
+        tally.set(key, cur);
+      }
+      VOTE_TALLY = tally;
+      $("#voteMode").textContent = "Votes: shared";
+    }catch(e){
+      // No Votes tab (or not accessible) -> local voting only.
+      $("#voteMode").textContent = "Votes: local";
+    }
+$("#lastRefresh").textContent = new Date().toLocaleString([], {month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"});
     showToast("Fresh dawgs fetched 🧾");
     render();
   } catch(e) {
@@ -1422,126 +1602,158 @@ function compute(scopeDays){
   const totalDogs = rows.reduce((acc,r)=>acc + (Number(r.count)||0), 0);
   const top = rows[0] || {displayName:"—", count:0, email:""};
 
-  const topCount = Number(top.count)||0;
-  const topTies = rows.filter(x => (Number(x.count)||0) === topCount);
-  return {rows, subs, totalDogs, top, topCount, topTies};
+  return {rows, subs, totalDogs, top};
 }
 
-function render(){
-  const scope = $("#scope").value;
-  const q = ($("#q").value || "").trim().toLowerCase();
-  const {rows, subs, totalDogs, top, topCount, topTies} = compute(scope);
 
-  // header
-  $("#asof").textContent = `Live from Google Sheets • Scope: ${scope === "all" ? "All time" : `last ${scope} days`} • Tabs: "${TAB_TALLY}", "${TAB_RESPONSES}"`;
+function buildFeedList(rows, subs){
+  const sort = $("#feedSort") ? $("#feedSort").value : "new";
+  const list = subs.slice();
 
-  // quote
-  $("#dailyQuote").textContent = buildDailyQuote(rows, subs);
+  if(sort === "best" || sort === "worst"){
+    list.sort((a,b) => {
+      const sa = getVoteCounts(submissionId(a)).score;
+      const sb = getVoteCounts(submissionId(b)).score;
+      if(sa !== sb) return sort === "best" ? (sb - sa) : (sa - sb);
+      return (parseDate(b.ts) - parseDate(a.ts));
+    });
+  } else {
+    // newest
+    list.sort((a,b)=> parseDate(b.ts) - parseDate(a.ts));
+  }
+  return list;
+}
 
-  // stats
-  animateInt($("#totalDogs"), totalDogs);
-  (function(){
-    if(!topTies || topTies.length <= 1){
-      $("#topDawg").textContent = `${top.displayName} (${topCount})`;
+function updateVoteLeaders(list, rows){
+  const bestEl = $("#bestDawg");
+  const worstEl = $("#worstDawg");
+  if(!bestEl || !worstEl) return;
+
+  let best = null, worst = null;
+  for(const s of list){
+    const id = submissionId(s);
+    const v = getVoteCounts(id);
+    if(v.up + v.down === 0) continue;
+    if(!best || v.score > best.v.score || (v.score === best.v.score && parseDate(s.ts) > parseDate(best.s.ts))){
+      best = {s, v};
+    }
+    if(!worst || v.score < worst.v.score || (v.score === worst.v.score && parseDate(s.ts) > parseDate(worst.s.ts))){
+      worst = {s, v};
+    }
+  }
+
+  function renderMini(target, item, emptyText){
+    target.classList.add("mini");
+    if(!item){
+      target.textContent = emptyText;
       return;
     }
-    const names = topTies.map(x => x.displayName).filter(Boolean);
-    const shown = names.slice(0,2).join(" & ");
-    const more = names.length > 2 ? ` +${names.length-2}` : "";
-    $("#topDawg").textContent = `Tie: ${shown}${more} (${topCount})`;
-  })();
+    const name = (item.s.name && item.s.name.trim())
+      ? item.s.name.trim()
+      : (rows.find(p=>p.email===item.s.email)?.displayName || pseudonymFromEmail(item.s.email));
+    const thumb = item.s.photo ? driveThumb(item.s.photo) : null;
+    const score = item.v.score;
 
-  const start = new Date("2026-01-01T00:00:00");
-  const end = new Date("2026-12-31T23:59:59");
-  const now = new Date();
-  const totalSeasonDays = Math.max(1, Math.ceil((end - start) / (24*3600*1000)));
-
-  // inclusive countdown: on Dec 31 show 1
-  let daysLeft = 0;
-  if (now <= end) {
-    daysLeft = Math.floor((end - now) / (24*3600*1000)) + 1;
-  }
-  animateInt($("#daysLeft"), daysLeft);
-  $("#refreshIntervalLabel").textContent = String(AUTO_REFRESH_MIN);
-
-  $("#spark1").style.width = Math.min(100, 20 + (totalDogs % 80)) + "%";
-  $("#spark2").style.width = Math.min(100, 25 + ((Number(top.count)||0) * 3)) + "%";
-  $("#spark3").style.width = Math.max(2, Math.round((daysLeft / totalSeasonDays) * 100)) + "%";
-
-  // leaderboard filter
-  const filtered = rows.filter(r => {
-    const a = (r.displayName||"").toLowerCase();
-    return !q || a.includes(q);
-  });
-
-const max = rows.length ? (Number(rows[0].count)||1) : 1;
-  const tbody = $("#tbody");
-  tbody.innerHTML = "";
-
-  const freqByCount = new Map();
-  rows.forEach(rr => {
-    const c = Number(rr.count)||0;
-    freqByCount.set(c, (freqByCount.get(c)||0)+1);
-  });
-
-  let prevCount = null;
-  let prevRank = 0;
-
-  filtered.forEach((r, idx) => {
-    const tr = document.createElement("tr");
-    const cNow = Number(r.count)||0;
-    const rank = (prevCount === cNow) ? prevRank : (idx + 1);
-    prevCount = cNow;
-    prevRank = rank;
-
-    const isTied = (freqByCount.get(cNow) || 0) > 1;
-    const rankLabel = isTied ? `T#${rank}` : `#${rank}`;
-
-    const firstPhoto = (subs.find(s=>s.email===r.email)?.photo)||"";
-    const id = driveIdFromUrl(firstPhoto);
-    const ava = id ? `<img src="${driveThumb(firstPhoto)}" alt="" loading="lazy">` : initials(r.displayName);
-
-    const last = (r.lastSeen && !isNaN(r.lastSeen.getTime())) ? r.lastSeen.toLocaleString([], {month:"short", day:"2-digit"}) : "—";
-    const pct = max ? Math.max(2, Math.round(((Number(r.count)||0) / max) * 100)) : 0;
-
-    tr.innerHTML = `
-      <td class="rank">${rankLabel}</td>
-      <td>
-        <div class="namecell">
-          <div class="avatar">${ava}</div>
-          <div class="name">
-            <b>${escapeHtml(r.displayName)}</b>
-            
-          </div>
-        </div>
-      </td>
-      <td class="count">${Number(r.count)||0}</td>
-      <td>
-        <div class="bar" title="${pct}% of top Dawg">
-          <span style="width:${pct}%"></span>
-        </div>
-      </td>
-      <td><span class="chip">🕵️ <strong>${last}</strong></span></td>
+    target.innerHTML = `
+      <div class="mini-thumb">${thumb ? `<img src="${thumb}" alt="" loading="lazy">` : ""}</div>
+      <div class="mini-meta">
+        <b>${escapeHtml(name)}</b>
+        <div class="t">Score: <span class="vote-score">${score}</span> • ${fmtDate(item.s.ts)}</div>
+      </div>
     `;
+  }
 
-    tr.addEventListener("click", () => {
-      copyText(buildCallout(r, topCount, topTies, spicyOn()));
+  renderMini(bestEl, best, "Vote to crown a champion.");
+  renderMini(worstEl, worst, "Vote to crown a villain.");
+}
+
+function renderVoteButtons(container, id){
+  const v = getVoteCounts(id);
+  const mine = Number(LOCAL_VOTES[id] || 0);
+
+  container.innerHTML = `
+    <button class="vote-btn up ${mine===1?"active":""}" data-vote="up" title="Upvote">👍 <span class="vote-count">${v.up}</span></button>
+    <button class="vote-btn down ${mine===-1?"active":""}" data-vote="down" title="Downvote">👎 <span class="vote-count">${v.down}</span></button>
+    <span class="chip">Score <strong class="vote-score">${v.score}</strong></span>
+  `;
+
+  container.querySelectorAll(".vote-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const kind = btn.dataset.vote;
+      const prev = Number(LOCAL_VOTES[id] || 0);
+      const next = (kind === "up") ? (prev === 1 ? 0 : 1) : (prev === -1 ? 0 : -1);
+
+      if(next === 0) delete LOCAL_VOTES[id];
+      else LOCAL_VOTES[id] = next;
+      saveLocalVotes();
+
+      // optimistic tally update
+      const cur = getVoteCounts(id);
+      let up = cur.up, down = cur.down;
+      if(prev === 1) up = Math.max(0, up - 1);
+      if(prev === -1) down = Math.max(0, down - 1);
+      if(next === 1) up += 1;
+      if(next === -1) down += 1;
+      setVoteCounts(id, up, down);
+
+      // rerender this control
+      renderVoteButtons(container, id);
+
+      // reorder feed if sorting by votes, else only leaders update
+      const sort = $("#feedSort") ? $("#feedSort").value : "new";
+      if(sort === "best" || sort === "worst"){
+        FEED_STATE.key = "";
+        render();
+      } else {
+        updateVoteLeaders(FEED_STATE.list, window.__rowsForLeaders || []);
+      }
     });
-
-    tbody.appendChild(tr);
   });
+}
 
-  // feed
+function resetFeed(list){
   const feed = $("#feed");
-  feed.innerHTML = "";
-  const useSubs = subs.slice(0, FEED_LIMIT);
-  $("#latestCount").textContent = useSubs.length;
+  const sentinel = $("#feedSentinel");
+  if(!feed || !sentinel) return;
 
-  const usedComments = new Set();
-  useSubs.forEach((s) => {
-    const name = (s.name && s.name.trim()) ? s.name.trim() : (rows.find(p=>p.email===s.email)?.displayName || pseudonymFromEmail(s.email));
+  FEED_STATE.list = list;
+  FEED_STATE.cursor = 0;
+  FEED_STATE.usedComments = new Set();
+  feed.innerHTML = "";
+
+  $("#feedTotal").textContent = String(list.length);
+  $("#feedShown").textContent = "0";
+  $("#latestCount").textContent = String(list.length);
+
+  sentinel.classList.toggle("hidden", list.length === 0);
+  sentinel.textContent = list.length ? "Loading more dawgs…" : "No submissions (yet).";
+
+  appendMoreFeed();
+}
+
+function appendMoreFeed(){
+  const feed = $("#feed");
+  const sentinel = $("#feedSentinel");
+  if(!feed || !sentinel) return;
+
+  if(FEED_STATE.cursor >= FEED_STATE.list.length){
+    sentinel.textContent = "That’s all the dawgs. For now.";
+    return;
+  }
+
+  const start = FEED_STATE.cursor;
+  const end = Math.min(FEED_STATE.list.length, start + FEED_PAGE_SIZE);
+  const slice = FEED_STATE.list.slice(start, end);
+  FEED_STATE.cursor = end;
+
+  slice.forEach((s) => {
+    const name = (s.name && s.name.trim())
+      ? s.name.trim()
+      : (pseudonymFromEmail ? pseudonymFromEmail(s.email) : "Mystery Dawg");
     const thumb = s.photo ? driveThumb(s.photo) : null;
-    const comment = pickComment(name, spicyOn(), `${s.email}|${s.ts}|${s.photo}`, usedComments);
+    const id = submissionId(s);
+
+    const comment = pickComment(name, spicyOn(), `${s.email}|${s.ts}|${s.photo}`, FEED_STATE.usedComments);
 
     const div = document.createElement("div");
     div.className = "post";
@@ -1558,10 +1770,121 @@ const max = rows.length ? (Number(rows[0].count)||1) : 1;
           </div>
         </div>
         <p>${escapeHtml(comment)}</p>
+        <div class="vote-row" data-vote-row="1"></div>
       </div>
     `;
+    const voteRow = div.querySelector('[data-vote-row="1"]');
+    renderVoteButtons(voteRow, id);
+
     feed.appendChild(div);
   });
+
+  $("#feedShown").textContent = String(FEED_STATE.cursor);
+  sentinel.textContent = (FEED_STATE.cursor >= FEED_STATE.list.length) ? "That’s all the dawgs. For now." : "Loading more dawgs…";
+}
+
+function render(){
+  const scope = $("#scope").value;
+  const q = ($("#q").value || "").trim().toLowerCase();
+  const {rows, subs, totalDogs, top} = compute(scope);
+
+  // header
+  $("#asof").textContent = `Live from Google Sheets • Scope: ${scope === "all" ? "All time" : `last ${scope} days`} • Tabs: "${TAB_TALLY}", "${TAB_RESPONSES}"`;
+
+  // quote
+  $("#dailyQuote").textContent = buildDailyQuote(rows, subs);
+
+  // stats
+  animateInt($("#totalDogs"), totalDogs);
+  $("#topDawg").textContent = `${top.displayName} (${top.count})`;
+
+  const start = new Date("2026-01-01T00:00:00");
+  const end = new Date("2026-12-31T23:59:59");
+  const now = new Date();
+  const totalSeasonDays = Math.max(1, Math.ceil((end - start) / (24*3600*1000)));
+
+  // inclusive countdown: on Dec 31 show 1
+  let daysLeft = 0;
+  if (now <= end) {
+    daysLeft = Math.floor((end - now) / (24*3600*1000)) + 1;
+  }
+  animateInt($("#daysLeft"), daysLeft);
+  // Days elapsed since season start (inclusive), capped at season length
+  const clampedNow = (now <= end) ? now : end;
+  const daysElapsed = (now >= start) ? Math.min(totalSeasonDays, Math.floor((clampedNow - start) / (24*3600*1000)) + 1) : 0;
+
+  $("#refreshIntervalLabel").textContent = String(AUTO_REFRESH_MIN);
+
+  $("#spark1").style.width = Math.min(100, 20 + (totalDogs % 80)) + "%";
+  $("#spark2").style.width = Math.min(100, 25 + ((Number(top.count)||0) * 3)) + "%";
+  $("#spark3").style.width = Math.max(2, Math.round((daysLeft / totalSeasonDays) * 100)) + "%";
+
+  // leaderboard filter
+  const filtered = rows.filter(r => {
+    const a = (r.displayName||"").toLowerCase();
+    return !q || a.includes(q);
+  });
+
+const max = rows.length ? (Number(rows[0].count)||1) : 1;
+  const tbody = $("#tbody");
+  tbody.innerHTML = "";
+
+  filtered.forEach((r, idx) => {
+    const tr = document.createElement("tr");
+    const rank = idx + 1;
+
+    const firstPhoto = (subs.find(s=>s.email===r.email)?.photo)||"";
+    const id = driveIdFromUrl(firstPhoto);
+    const ava = id ? `<img src="${driveThumb(firstPhoto)}" alt="" loading="lazy">` : initials(r.displayName);
+
+    const last = (r.lastSeen && !isNaN(r.lastSeen.getTime())) ? r.lastSeen.toLocaleString([], {month:"short", day:"2-digit"}) : "—";
+    const pct = max ? Math.max(2, Math.round(((Number(r.count)||0) / max) * 100)) : 0;
+
+    // Avg dawgs per day since season start (inclusive)
+    const avg = (daysElapsed > 0) ? ((Number(r.count)||0) / daysElapsed).toFixed(2) : "0.00";
+
+    tr.innerHTML = `
+      <td class="rank">#${rank}</td>
+      <td>
+        <div class="namecell">
+          <div class="avatar">${ava}</div>
+          <div class="name">
+            <b>${escapeHtml(r.displayName)}</b>
+            
+          </div>
+        </div>
+      </td>
+      <td class="count">${Number(r.count)||0}</td>
+      <td class="avg">${avg}</td>
+      <td>
+        <div class="bar" title="${pct}% of top Dawg">
+          <span style="width:${pct}%"></span>
+        </div>
+      </td>
+      <td><span class="chip">🕵️ <strong>${last}</strong></span></td>
+    `;
+
+    tr.addEventListener("click", () => {
+      copyText(buildCallout(r, top, spicyOn()));
+    });
+
+    tbody.appendChild(tr);
+  });
+
+  // feed (endless)
+  const list = buildFeedList(rows, subs);
+  const sort = $("#feedSort") ? $("#feedSort").value : "new";
+  const feedKey = `${scope}|${sort}|${subs.length}|${subs[0] ? subs[0].ts : ""}|${VOTE_TALLY.size}`;
+
+  // Save rows reference for leader mini cards (name lookup)
+  window.__rowsForLeaders = rows;
+
+  if(FEED_STATE.key !== feedKey){
+    FEED_STATE.key = feedKey;
+    resetFeed(list);
+  }
+
+  updateVoteLeaders(list, rows);
 
   // shame
   const shame = rows
@@ -1608,20 +1931,30 @@ $("#spicy").addEventListener("change", () => {
 
 $("#celebrate").addEventListener("click", () => {
   confettiBurst();
-  const {top, topCount, topTies} = compute($("#scope").value);
-  if(topTies && topTies.length > 1){
-    const names = topTies.map(x => x.displayName).slice(0,3);
-    const more = topTies.length > 3 ? ` +${topTies.length-3}` : "";
-    showToast(`All hail ${names.join(" & ")}${more} 🏆 (tie at ${topCount})`);
-  }else{
-    showToast(`All hail ${top.displayName} 🏆`);
-  }
+  const {top} = compute($("#scope").value);
+  showToast(`All hail ${top.displayName} 🏆`);
 });
 
 $("#refreshNow").addEventListener("click", () => {
   loadLiveData();
 });
 
+$("#feedSort").addEventListener("change", () => {
+  FEED_STATE.key = "";
+  render();
+});
+
+// Infinite scroll: append more when sentinel comes near the viewport
+(function(){
+  const sentinel = document.getElementById("feedSentinel");
+  if(!sentinel) return;
+  const io = new IntersectionObserver((entries) => {
+    if(entries.some(e => e.isIntersecting)){
+      appendMoreFeed();
+    }
+  }, {root: null, rootMargin: "900px 0px"});
+  io.observe(sentinel);
+})();
 // keyboard
 document.addEventListener("keydown", (e) => {
   if(e.key === "/") {
