@@ -195,9 +195,10 @@
     /* Stats */
     .stats{
       display:grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap:12px;
     }
+    @media (max-width: 900px){ .stats{ grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 700px){ .stats{ grid-template-columns: 1fr; } }
     .stat{
       padding:12px;
@@ -239,7 +240,7 @@
       border-collapse:separate;
       border-spacing:0;
       font-size:13px;
-      min-width: 640px;
+      min-width: 740px;
     }
     thead th{
       text-align:left;
@@ -310,6 +311,19 @@
       white-space:nowrap;
     }
     .chip strong{ color: var(--text); }
+
+
+    /* Momentum + tie styling */
+    .chip.mom{ color: var(--text); border-color: rgba(255,255,255,.10); }
+    .chip.mom .mom-sub{ color: var(--muted); font-weight:900; }
+    .chip.mom.up{ border-color: rgba(74,214,109,.35); }
+    .chip.mom.down{ border-color: rgba(209,42,42,.35); }
+    .chip.mom.steady{ border-color: rgba(154,166,196,.22); }
+    .chip.mom.lead{ border-color: rgba(243,193,26,.45); }
+    .chip.mom.tie{ border-color: rgba(124,255,203,.35); }
+
+    tbody tr.is-tied{ background: rgba(124,255,203,.05); }
+    .lb-card.is-tied{ background: rgba(124,255,203,.06); border-color: rgba(124,255,203,.18); }
 
     /* Mobile leaderboard cards (prevents column overlap) */
     .lb-cards{ display:none; margin-top:10px; }
@@ -602,6 +616,12 @@
               <div class="spark"><span id="spark3"></span></div>
             </div>
 
+            <div class="stat">
+              <div class="k">Momentum (7d)</div>
+              <div class="v" id="momentumStat">—</div>
+              <div class="spark"><span id="spark4"></span></div>
+            </div>
+
             <div class="stat" style="grid-column: 1 / -1;">
               <div class="k">Cheesy Dawg Quote of the Day</div>
               <div class="v" id="dailyQuote" style="font-size:14px; line-height:1.25;">—</div>
@@ -622,6 +642,7 @@
                   <th>Count</th>
                   <th>Avg/day</th>
                   <th>Heat</th>
+                  <th>Momentum</th>
                   <th>Last Seen</th>
                 </tr>
               </thead>
@@ -1007,29 +1028,160 @@ function compute(scopeDays){
   return {rows, subs, totalDogs, top};
 }
 
-function buildCallout(r, top, spicy){
+function buildRankMap(rows){
+  const map = new Map();
+  let prevCount = null;
+  let prevRank = 0;
+
+  for(let i=0;i<rows.length;i++){
+    const r = rows[i];
+    const c = Number(r.count)||0;
+
+    let rank = 1;
+    if(i === 0) rank = 1;
+    else if(c === prevCount) rank = prevRank;
+    else rank = i + 1;
+
+    const nextCount = (i < rows.length - 1) ? (Number(rows[i+1].count)||0) : null;
+    const tied = (i > 0 && c === prevCount) || (i < rows.length - 1 && nextCount === c);
+
+    map.set(r.email, {rank, tied});
+    prevCount = c;
+    prevRank = rank;
+  }
+  return map;
+}
+
+function computeMomentum(){
+  const now = new Date();
+  const cutoff7 = new Date(now.getTime() - 7*24*3600*1000);
+  const cutoff14 = new Date(now.getTime() - 14*24*3600*1000);
+
+  const last7 = new Map();
+  const prev7 = new Map();
+
+  for(const s of (SUBMISSIONS || [])){
+    const d = parseDate(s.ts);
+    if(!d || isNaN(d.getTime())) continue;
+    const email = String(s.email||"").trim();
+    if(!email) continue;
+
+    if(d >= cutoff7){
+      last7.set(email, (last7.get(email)||0) + 1);
+    } else if(d >= cutoff14){
+      prev7.set(email, (prev7.get(email)||0) + 1);
+    }
+  }
+
+  const countNow = new Map();
+  for(const p of (PARTICIPANTS || [])){
+    const email = String(p.email||"").trim();
+    if(!email) continue;
+    countNow.set(email, Number(p.count)||0);
+  }
+
+  // include any email that has submissions but is missing from participants
+  for(const email of last7.keys()) if(!countNow.has(email)) countNow.set(email, last7.get(email)||0);
+  for(const email of prev7.keys()) if(!countNow.has(email)) countNow.set(email, 0);
+
+  let topNow = 0;
+  let topThen = 0;
+  for(const [email, cNow] of countNow){
+    const l7 = last7.get(email)||0;
+    const cThen = Math.max(0, (Number(cNow)||0) - l7);
+    if(cNow > topNow) topNow = cNow;
+    if(cThen > topThen) topThen = cThen;
+  }
+
+  const info = new Map();
+  for(const [email, cNow] of countNow){
+    const l7 = last7.get(email)||0;
+    const p7 = prev7.get(email)||0;
+    const cThen = Math.max(0, (Number(cNow)||0) - l7);
+
+    const gapNow = topNow - (Number(cNow)||0);
+    const gapThen = topThen - cThen;
+    const gapDelta = gapThen - gapNow; // + => catching up
+    const weekDelta = l7 - p7;
+
+    info.set(email, {last7:l7, prev7:p7, weekDelta, gapNow, gapThen, gapDelta});
+  }
+
+  return {info, topNow, topThen};
+}
+
+function formatLeadersLabel(leaders, topCount){
+  if(!leaders || !leaders.length || !(topCount > 0)) return "—";
+  if(leaders.length === 1) return `${leaders[0].displayName} (${topCount})`;
+  const names = leaders.slice(0,3).map(x => x.displayName);
+  if(leaders.length <= 3) return `Tie: ${names.join(", " )} (${topCount})`;
+  return `Tie: ${names.join(", " )} +${leaders.length-3} (${topCount})`;
+}
+
+function momentumMeta(r, m, leadersSet, topCount){
+  const last7 = m ? (m.last7||0) : 0;
+  const prev7 = m ? (m.prev7||0) : 0;
+  const gapDelta = m ? (m.gapDelta||0) : 0;
+
+  if(leadersSet && leadersSet.has(r.email) && topCount > 0){
+    const tieLead = leadersSet.size > 1;
+    const cls = tieLead ? "tie" : "lead";
+    const icon = tieLead ? "🤝" : "👑";
+    const value = tieLead ? "Tied" : "Lead";
+    const title = tieLead
+      ? `Tied for the lead at ${topCount}. 7d: ${last7} (prev7: ${prev7}).`
+      : `Leading at ${topCount}. 7d: ${last7} (prev7: ${prev7}).`;
+    return {cls, icon, value, title, last7, prev7, gapDelta};
+  }
+
+  let cls = "steady";
+  let icon = "⏸️";
+  let value = "0";
+  let verb = "held";
+
+  if(gapDelta > 0){ cls = "up"; icon = "⬆️"; value = `+${gapDelta}`; verb = "shrunk"; }
+  if(gapDelta < 0){ cls = "down"; icon = "⬇️"; value = `${gapDelta}`; verb = "grew"; }
+
+  const title = `Gap vs the leader ${verb} by ${Math.abs(gapDelta)} over the last 7 days. 7d: ${last7} (prev7: ${prev7}).`;
+  return {cls, icon, value, title, last7, prev7, gapDelta};
+}
+
+function buildCallout(r, ctx, spicy){
   const d = r.displayName;
   const c = Number(r.count)||0;
-  const delta = (Number(top.count)||0) - c;
+  const topCount = Number(ctx?.topCount)||0;
+  const leadersSet = ctx?.leadersSet || new Set();
+  const leaders = ctx?.leaders || [];
 
-  if(r.email === top.email){
+  const isLeader = (topCount > 0) && leadersSet.has(r.email);
+  const delta = topCount - c;
+
+  if(isLeader){
+    const tieLead = leaders.length > 1;
     return spicy
-      ? `🚨 TOP DAWG 🚨 ${d} is eating like they hate peace (${c}). Bow to the bun.`
-      : `🌭 Top Dawg: ${d} leads with ${c}. Respect the bun.`;
+      ? (tieLead
+        ? `🤝 CO-TOP DAWG 🤝 ${d} is tied for the lead (${c}).`
+        : `🚨 TOP DAWG 🚨 ${d} leads with ${c}. Bow to the bun.`)
+      : (tieLead
+        ? `🤝 Co-Top Dawg: ${d} is tied for the lead with ${c}.`
+        : `🌭 Top Dawg: ${d} leads with ${c}. Respect the bun.`);
   }
-  if(delta <= 2 && delta >= 0){
+
+  if(delta <= 2 && delta >= 1){
     return spicy
-      ? `${d} is one (1) hot dog away from becoming unbearable. Only ${delta} behind the top.`
-      : `${d} is close — only ${delta} behind the top. Time to cook.`;
+      ? `${d} is within ${delta} of the lead. The bun is nervous.`
+      : `${d} is close — only ${delta} behind the lead.`;
   }
+
   if(c <= 2){
     return spicy
-      ? `${d}, your count is so low it’s basically folklore. (${c}.) Fix it. 🌭`
+      ? `${d}, your count is low enough to be a rumor. (${c}.) Fix it. 🌭`
       : `${d}, we miss your dawgs. (${c} total.) Post one soon.`;
   }
+
   return spicy
-    ? `${d} has ${c} on the board. That’s fine… but the top Dawg has ${top.count}. Choose violence (mustard).`
-    : `${d} has ${c}. Top is ${top.count}. Plenty of runway — go get it.`;
+    ? `${d} has ${c}. The lead is ${topCount}. Choose condiments wisely.`
+    : `${d} has ${c}. Lead is ${topCount}. Plenty of runway — go get it.`;
 }
 
 function resetFeed(list){
@@ -1098,14 +1250,44 @@ function appendMoreFeed(){
 function render(){
   const scope = $("#scope").value;
   const q = ($("#q").value || "").trim().toLowerCase();
-  const {rows, subs, totalDogs, top} = compute(scope);
+  const {rows, subs, totalDogs} = compute(scope);
+
+  const topCount = rows.length ? (Number(rows[0].count)||0) : 0;
+  const leaders = rows.filter(r => (Number(r.count)||0) === topCount && topCount > 0);
+  const leadersSet = new Set(leaders.map(r => r.email));
+
+  const rankMap = buildRankMap(rows);
+  const momentum = computeMomentum();
+  const ctx = {topCount, leaders, leadersSet};
 
   $("#asof").textContent = `Live from Google Sheets • Scope: ${scope === "all" ? "All time" : `last ${scope} days`} • Tabs: "${TAB_TALLY}", "${TAB_RESPONSES}"`;
 
   $("#dailyQuote").textContent = buildDailyQuote(rows, subs);
 
   animateInt($("#totalDogs"), totalDogs);
-  $("#topDawg").textContent = `${top.displayName} (${top.count})`;
+  $("#topDawg").textContent = formatLeadersLabel(leaders, topCount);
+
+  // Momentum headline: biggest gap move vs leader over the last 7 days
+  const movers = rows.map(r => ({r, m: momentum.info.get(r.email)})).filter(x => x.m);
+  let best = null;
+  for(const x of movers){
+    const score = Math.abs(Number(x.m.gapDelta)||0);
+    if(!best || score > best.score) best = {score, ...x};
+  }
+  const ms = $("#momentumStat");
+  const s4 = $("#spark4");
+  if(ms){
+    if(!best || !(topCount > 0)){
+      ms.textContent = "—";
+      if(s4) s4.style.width = "2%";
+    } else {
+      const gd = Number(best.m.gapDelta)||0;
+      const icon = gd > 0 ? "⬆️" : (gd < 0 ? "⬇️" : "⏸️");
+      const val = gd > 0 ? `+${gd}` : `${gd}`;
+      ms.textContent = `${icon} ${best.r.displayName} ${val}`;
+      if(s4) s4.style.width = Math.min(100, Math.max(4, 25 + best.score * 18)) + "%";
+    }
+  }
 
   const start = new Date("2026-01-01T00:00:00");
   const end = new Date("2026-12-31T23:59:59");
@@ -1123,7 +1305,7 @@ function render(){
   const daysElapsed = (now >= start) ? Math.min(totalSeasonDays, Math.floor((clampedNow - start) / (24*3600*1000)) + 1) : 0;
 
   $("#spark1").style.width = Math.min(100, 20 + (totalDogs % 80)) + "%";
-  $("#spark2").style.width = Math.min(100, 25 + ((Number(top.count)||0) * 3)) + "%";
+  $("#spark2").style.width = Math.min(100, 25 + (topCount * 3)) + "%";
   $("#spark3").style.width = Math.max(2, Math.round((daysLeft / totalSeasonDays) * 100)) + "%";
 
   const filtered = rows.filter(r => {
@@ -1131,13 +1313,17 @@ function render(){
     return !q || a.includes(q);
   });
 
-  const max = rows.length ? (Number(rows[0].count)||1) : 1;
+  const max = Math.max(1, topCount || 0);
 
   const tbody = $("#tbody");
   tbody.innerHTML = "";
   filtered.forEach((r, idx) => {
     const tr = document.createElement("tr");
-    const rank = idx + 1;
+
+    const rankInfo = rankMap.get(r.email) || {rank: idx + 1, tied: false};
+    const rankLabel = rankInfo.tied ? `T${rankInfo.rank}` : `#${rankInfo.rank}`;
+    const rankTitle = rankInfo.tied ? `Tied for #${rankInfo.rank}` : `Rank #${rankInfo.rank}`;
+    if(rankInfo.tied) tr.classList.add("is-tied");
 
     const firstPhoto = (subs.find(s=>s.email===r.email)?.photo)||"";
     const id = driveIdFromUrl(firstPhoto);
@@ -1147,8 +1333,11 @@ function render(){
     const pct = max ? Math.max(2, Math.round(((Number(r.count)||0) / max) * 100)) : 0;
     const avg = (daysElapsed > 0) ? ((Number(r.count)||0) / daysElapsed).toFixed(2) : "0.00";
 
+    const mom = momentumMeta(r, momentum.info.get(r.email), leadersSet, topCount);
+    const momChip = `<span class="chip mom ${mom.cls}" title="${escapeHtml(mom.title)}">${mom.icon} <strong>${escapeHtml(mom.value)}</strong> <span class="mom-sub">7d ${mom.last7}</span></span>`;
+
     tr.innerHTML = `
-      <td class="rank">#${rank}</td>
+      <td class="rank" title="${rankTitle}">${rankLabel}</td>
       <td>
         <div class="namecell">
           <div class="avatar">${ava}</div>
@@ -1164,16 +1353,19 @@ function render(){
           <span style="width:${pct}%"></span>
         </div>
       </td>
+      <td>${momChip}</td>
       <td><span class="chip">🕵️ <strong>${last}</strong></span></td>
     `;
-    tr.addEventListener("click", () => copyText(buildCallout(r, top, spicyOn())));
+    tr.addEventListener("click", () => copyText(buildCallout(r, ctx, spicyOn())));
     tbody.appendChild(tr);
   });
 
   const lbCards = $("#lbCards");
   lbCards.innerHTML = "";
   filtered.forEach((r, idx) => {
-    const rank = idx + 1;
+    const rankInfo = rankMap.get(r.email) || {rank: idx + 1, tied: false};
+    const rankLabel = rankInfo.tied ? `T${rankInfo.rank}` : `#${rankInfo.rank}`;
+
     const firstPhoto = (subs.find(s=>s.email===r.email)?.photo)||"";
     const id = driveIdFromUrl(firstPhoto);
     const ava = id ? `<img src="${driveThumb(firstPhoto)}" alt="" loading="lazy">` : initials(r.displayName);
@@ -1182,10 +1374,13 @@ function render(){
     const pct = max ? Math.max(2, Math.round(((Number(r.count)||0) / max) * 100)) : 0;
     const avg = (daysElapsed > 0) ? ((Number(r.count)||0) / daysElapsed).toFixed(2) : "0.00";
 
+    const mom = momentumMeta(r, momentum.info.get(r.email), leadersSet, topCount);
+    const momChip = `<span class="chip mom ${mom.cls}" title="${escapeHtml(mom.title)}">${mom.icon} <strong>${escapeHtml(mom.value)}</strong> <span class="mom-sub">7d ${mom.last7}</span></span>`;
+
     const card = document.createElement("div");
-    card.className = "lb-card";
+    card.className = "lb-card" + (rankInfo.tied ? " is-tied" : "");
     card.innerHTML = `
-      <div class="lb-left">#${rank}</div>
+      <div class="lb-left">${rankLabel}</div>
       <div class="lb-mid">
         <div class="row1">
           <div class="avatar" style="width:30px;height:30px;border-radius:12px;">${ava}</div>
@@ -1194,6 +1389,7 @@ function render(){
         <div class="row2">
           <span class="chip">Count <strong>${Number(r.count)||0}</strong></span>
           <span class="chip">Avg/day <strong>${avg}</strong></span>
+          ${momChip}
           <span class="chip">Seen <strong>${last}</strong></span>
         </div>
       </div>
@@ -1201,7 +1397,7 @@ function render(){
         <div class="bar" title="${pct}% of top Dawg"><span style="width:${pct}%"></span></div>
       </div>
     `;
-    card.addEventListener("click", () => copyText(buildCallout(r, top, spicyOn())));
+    card.addEventListener("click", () => copyText(buildCallout(r, ctx, spicyOn())));
     lbCards.appendChild(card);
   });
 
@@ -1364,8 +1560,23 @@ $("#spicy").addEventListener("change", () => {
 
 $("#celebrate").addEventListener("click", () => {
   confettiBurst();
-  const {top} = compute($("#scope").value);
-  showToast(`All hail ${top.displayName} 🏆`);
+  const {rows} = compute($("#scope").value);
+  const topCount = rows.length ? (Number(rows[0].count)||0) : 0;
+  const leaders = rows.filter(r => (Number(r.count)||0) === topCount && topCount > 0);
+
+  if(!leaders.length){
+    showToast("No dawgs yet — be the first 🌭");
+    return;
+  }
+
+  if(leaders.length === 1){
+    showToast(`All hail ${leaders[0].displayName} 🏆`);
+    return;
+  }
+
+  const names = leaders.slice(0,3).map(x => x.displayName);
+  const extra = leaders.length > 3 ? ` +${leaders.length-3} more` : "";
+  showToast(`All hail the tied leaders: ${names.join(", " )}${extra} 🏆`);
 });
 
 $("#refreshNow").addEventListener("click", () => {
